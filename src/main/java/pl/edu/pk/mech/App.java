@@ -5,32 +5,32 @@ import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 
+import javax.swing.WindowConstants;
 import java.io.File;
 
 public class App {
     private static final File VIDEO = new File("Example_Videos\\Example_video.mp4");
 
-    public static void main(String[] args) throws FrameGrabber.Exception {
-        FrameGrabber grabber = FFmpegFrameGrabber.createDefault(VIDEO);
-        grabber.setFrameRate(60);
-        grabber.setFormat("mp4");
+    public static void main(String[] args) throws FrameGrabber.Exception, InterruptedException {
+        FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(VIDEO);
         grabber.start();
 
-        final CanvasFrame cFrame = new CanvasFrame("Capture Preview", CanvasFrame.getDefaultGamma() / grabber.getGamma());
+        CanvasFrame canvas = new CanvasFrame("Preview Video", 1);
+        canvas.setCanvasSize(grabber.getImageWidth(), grabber.getImageHeight());
+        canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        Frame capturedFrame = null;
+        long delay = Math.round(1000d / grabber.getFrameRate());
 
-        // While we are capturing...
-        while ((capturedFrame = grabber.grab()) != null)
-        {
-            if (cFrame.isVisible())
-            {
-                // Show our frame in the preview
-                cFrame.showImage(capturedFrame);
-            }
+        // Read frame by frame, stop early if the display window is closed
+        Frame frame;
+        while ((frame = grabber.grabImage()) != null && canvas.isVisible()) {
+            // Capture and show the frame
+            canvas.showImage(frame);
+            // Delay
+            Thread.sleep(delay);
         }
 
-        cFrame.dispose();
-        grabber.stop();
+        canvas.dispose();
+        grabber.release();
     }
 }
