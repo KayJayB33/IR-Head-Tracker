@@ -1,17 +1,24 @@
 package pl.edu.pk.mech;
 
+import javafx.application.Application;
+import javafx.stage.Stage;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 
-import javax.swing.WindowConstants;
+import javax.swing.*;
 import java.io.File;
 
-public class App {
-    private static final File VIDEO = new File("Example_Videos\\Example_video.mp4");
+public class App extends Application {
 
-    public static void main(String[] args) throws FrameGrabber.Exception, InterruptedException {
+    private static final File VIDEO = new File("Example_Videos\\Example_video.mp4");
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws FFmpegFrameGrabber.Exception, InterruptedException {
         FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(VIDEO);
         grabber.start();
 
@@ -31,6 +38,7 @@ public class App {
         }
 
         canvas.dispose();
+        grabber.stop();
         grabber.release();
     }
 }

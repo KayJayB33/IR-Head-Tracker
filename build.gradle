@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.13'
 }
 
 group 'pl.edu.pk.mech'
@@ -18,6 +19,11 @@ dependencies {
 
 application {
     mainClass = 'pl.edu.pk.mech.App'
+}
+
+javafx {
+    version = '17.0.2'
+    modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
 
 test {
