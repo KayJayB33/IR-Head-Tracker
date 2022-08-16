@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0"
+            prefWidth="600.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="pl.edu.pk.mech.controller.MainWindowController">
+   <bottom>
+      <Button fx:id="startButton" mnemonicParsing="false" onAction="#startCapturing" text="Start"
+              BorderPane.alignment="CENTER">
+         <BorderPane.margin>
+            <Insets bottom="10.0"/>
+         </BorderPane.margin>
+         <padding>
+            <Insets bottom="20.0" left="40.0" right="40.0" top="20.0"/>
+         </padding>
+         <font>
+            <Font size="18.0"/>
+         </font>
+      </Button>
+   </bottom>
+   <center>
+      <ImageView fx:id="imageView" fitHeight="400.0" fitWidth="400.0" pickOnBounds="true" preserveRatio="true"
+                 BorderPane.alignment="CENTER"/>
+   </center>
+</BorderPane>

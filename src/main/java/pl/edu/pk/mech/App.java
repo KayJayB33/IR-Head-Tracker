@@ -1,44 +1,44 @@
 package pl.edu.pk.mech;
 
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import org.bytedeco.javacv.CanvasFrame;
-import org.bytedeco.javacv.FFmpegFrameGrabber;
-import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.FrameGrabber;
+import pl.edu.pk.mech.controller.MainWindowController;
 
-import javax.swing.*;
 import java.io.File;
+import java.io.IOException;
+import java.util.Objects;
+import java.util.logging.Logger;
 
 public class App extends Application {
 
-    private static final File VIDEO = new File("Example_Videos\\Example_video.mp4");
+    public static final File VIDEO_FILE = new File(
+            (Objects.requireNonNull(App.class.getClassLoader().getResource("ExampleVideo.mp4"))).getFile());
+
     public static void main(String[] args) {
         launch(args);
     }
 
+    private static final Logger LOGGER = Logger.getLogger(App.class.getName());
+
     @Override
-    public void start(Stage primaryStage) throws FFmpegFrameGrabber.Exception, InterruptedException {
-        FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(VIDEO);
-        grabber.start();
+    public void start(Stage primaryStage) throws IOException {
+        FXMLLoader loader = new FXMLLoader(this.getClass().getResource("/MainWindow.fxml"));
+        BorderPane root = loader.load();
+        MainWindowController controller = loader.getController();
+        Scene scene = new Scene(root);
 
-        CanvasFrame canvas = new CanvasFrame("Preview Video", 1);
-        canvas.setCanvasSize(grabber.getImageWidth(), grabber.getImageHeight());
-        canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        primaryStage.setTitle("IR Head Tracker");
+        primaryStage.setScene(scene);
+        primaryStage.show();
 
-        long delay = Math.round(1000d / grabber.getFrameRate());
+        LOGGER.info(String.format("Video resource: %s", VIDEO_FILE));
+    }
 
-        // Read frame by frame, stop early if the display window is closed
-        Frame frame;
-        while ((frame = grabber.grabImage()) != null && canvas.isVisible()) {
-            // Capture and show the frame
-            canvas.showImage(frame);
-            // Delay
-            Thread.sleep(delay);
-        }
-
-        canvas.dispose();
-        grabber.stop();
-        grabber.release();
+    @Override
+    public void stop() {
+        LOGGER.info("Closing app...");
     }
 }
