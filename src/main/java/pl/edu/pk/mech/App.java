@@ -17,6 +17,8 @@ public class App extends Application {
     public static final File VIDEO_FILE = new File(
             (Objects.requireNonNull(App.class.getClassLoader().getResource("ExampleVideo.mp4"))).getFile());
 
+    private MainWindowController controller;
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -27,7 +29,9 @@ public class App extends Application {
     public void start(Stage primaryStage) throws IOException {
         FXMLLoader loader = new FXMLLoader(this.getClass().getResource("/MainWindow.fxml"));
         BorderPane root = loader.load();
-        MainWindowController controller = loader.getController();
+
+        controller = loader.getController();
+
         Scene scene = new Scene(root);
 
         primaryStage.setTitle("IR Head Tracker");
@@ -40,5 +44,6 @@ public class App extends Application {
     @Override
     public void stop() {
         LOGGER.info("Closing app...");
+        controller.close();
     }
 }

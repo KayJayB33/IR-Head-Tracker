@@ -11,7 +11,7 @@
             prefWidth="600.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="pl.edu.pk.mech.controller.MainWindowController">
    <bottom>
-      <Button fx:id="startButton" mnemonicParsing="false" onAction="#startCapturing" text="Start"
+      <Button fx:id="startButton" mnemonicParsing="false" onAction="#buttonOnAction" text="Start"
               BorderPane.alignment="CENTER">
          <BorderPane.margin>
             <Insets bottom="10.0"/>
