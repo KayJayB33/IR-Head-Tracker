@@ -10,13 +10,7 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.JavaFXFrameConverter;
 import pl.edu.pk.mech.App;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.SourceDataLine;
 import java.io.Closeable;
-import java.nio.ByteBuffer;
-import java.nio.ShortBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -35,36 +29,23 @@ public class MainWindowController implements Closeable {
 
     @Override
     public void close() {
-        isPlaying = false;
+        playThread.interrupt();
+        stopCapturing();
     }
 
     private static class PlaybackTimer {
         private Long startTime = -1L;
-        private final DataLine soundLine;
-
-        public PlaybackTimer(DataLine soundLine) {
-            this.soundLine = soundLine;
-        }
-
-        public PlaybackTimer() {
-            this.soundLine = null;
-        }
 
         public void start() {
-            if (soundLine == null) {
-                startTime = System.nanoTime();
-            }
+            startTime = System.nanoTime();
         }
 
         public long elapsedMicros() {
-            if (soundLine == null) {
-                if (startTime < 0) {
-                    throw new IllegalStateException("PlaybackTimer not initialized.");
-                }
-                return (System.nanoTime() - startTime) / 1000;
-            } else {
-                return soundLine.getMicrosecondPosition();
+            if (startTime < 0) {
+                throw new IllegalStateException("PlaybackTimer not initialized.");
             }
+
+            return (System.nanoTime() - startTime) / 1000;
         }
     }
 
@@ -81,11 +62,17 @@ public class MainWindowController implements Closeable {
     }
 
     private void stopCapturing() {
+        LOGGER.info("Stopping capturing...");
+
         isPlaying = false;
         startButton.setText("Start");
     }
 
     private void startCapturing() {
+        if (isPlaying) {
+            stopCapturing();
+        }
+
         startButton.setText("Stop");
         playThread = new Thread(() -> {
             try {
@@ -94,24 +81,10 @@ public class MainWindowController implements Closeable {
                 isPlaying = true;
 
                 final PlaybackTimer playbackTimer;
-                final SourceDataLine soundLine;
 
-                if (grabber.getAudioChannels() > 0) {
-                    final AudioFormat audioFormat = new AudioFormat(grabber.getSampleRate(), 16, grabber.getAudioChannels(), true, true);
-
-                    final DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
-                    soundLine = (SourceDataLine) AudioSystem.getLine(info);
-                    soundLine.open(audioFormat);
-                    soundLine.start();
-                    playbackTimer = new PlaybackTimer(soundLine);
-                } else {
-                    soundLine = null;
-                    playbackTimer = new PlaybackTimer();
-                }
-
+                playbackTimer = new PlaybackTimer();
                 final JavaFXFrameConverter converter = new JavaFXFrameConverter();
 
-                final ExecutorService audioExecutor = Executors.newSingleThreadExecutor();
                 final ExecutorService imageExecutor = Executors.newSingleThreadExecutor();
 
                 final long maxReadAheadBufferMicros = 1000 * 1000L;
@@ -122,10 +95,12 @@ public class MainWindowController implements Closeable {
                     if (frame == null) {
                         break;
                     }
+
                     if (lastTimeStamp < 0) {
                         playbackTimer.start();
                     }
                     lastTimeStamp = frame.timestamp;
+
                     if (frame.image != null) {
                         final Frame imageFrame = frame.clone();
 
@@ -143,25 +118,8 @@ public class MainWindowController implements Closeable {
                             }
                             Platform.runLater(() -> imageView.setImage(image));
                         });
-                    } else if (frame.samples != null) {
-                        if (soundLine == null) {
-                            throw new IllegalStateException("Internal error: sound playback not initialized");
-                        }
-                        final ShortBuffer channelSamplesShortBuffer = (ShortBuffer) frame.samples[0];
-                        channelSamplesShortBuffer.rewind();
-
-                        final ByteBuffer outBuffer = ByteBuffer.allocate(channelSamplesShortBuffer.capacity() * 2);
-
-                        for (int i = 0; i < channelSamplesShortBuffer.capacity(); i++) {
-                            short val = channelSamplesShortBuffer.get(i);
-                            outBuffer.putShort(val);
-                        }
-
-                        audioExecutor.submit(() -> {
-                            soundLine.write(outBuffer.array(), 0, outBuffer.capacity());
-                            outBuffer.clear();
-                        });
                     }
+
                     final long timeStampDeltaMicros = frame.timestamp - playbackTimer.elapsedMicros();
                     if (timeStampDeltaMicros > maxReadAheadBufferMicros) {
                         Thread.sleep((timeStampDeltaMicros - maxReadAheadBufferMicros) / 1000);
@@ -175,13 +133,9 @@ public class MainWindowController implements Closeable {
                 }
                 grabber.stop();
                 grabber.release();
-                if (soundLine != null) {
-                    soundLine.stop();
-                }
-                audioExecutor.shutdownNow();
-                audioExecutor.awaitTermination(10, TimeUnit.SECONDS);
+
                 imageExecutor.shutdownNow();
-                imageExecutor.awaitTermination(10, TimeUnit.SECONDS);
+                imageExecutor.awaitTermination(5, TimeUnit.SECONDS);
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, String.format("Exception occured: %s", e.getMessage()), e);
             } finally {

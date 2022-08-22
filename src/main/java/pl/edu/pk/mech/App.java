@@ -1,6 +1,7 @@
 package pl.edu.pk.mech;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
@@ -45,5 +46,6 @@ public class App extends Application {
     public void stop() {
         LOGGER.info("Closing app...");
         controller.close();
+        Platform.exit();
     }
 }
