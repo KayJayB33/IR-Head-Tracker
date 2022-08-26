@@ -9,6 +9,7 @@ import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.JavaFXFrameConverter;
 import pl.edu.pk.mech.App;
+import pl.edu.pk.mech.ObjectTracker;
 
 import java.io.Closeable;
 import java.util.concurrent.ExecutorService;
@@ -22,15 +23,22 @@ public class MainWindowController implements Closeable {
     @FXML
     private Button startButton;
     @FXML
-    private ImageView imageView;
+    private ImageView cameraImageView;
+    @FXML
+    private ImageView maskImageView;
 
     private volatile Thread playThread;
     private volatile boolean isPlaying = false;
 
     @Override
     public void close() {
-        playThread.interrupt();
-        stopCapturing();
+        if (playThread != null) {
+            playThread.interrupt();
+        }
+
+        if (isPlaying) {
+            stopCapturing();
+        }
     }
 
     private static class PlaybackTimer {
@@ -69,21 +77,20 @@ public class MainWindowController implements Closeable {
     }
 
     private void startCapturing() {
-        if (isPlaying) {
-            stopCapturing();
-        }
-
         startButton.setText("Stop");
         playThread = new Thread(() -> {
             try {
                 final FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(App.VIDEO_FILE);
                 grabber.start();
+
+                LOGGER.info("Capturing started...");
                 isPlaying = true;
 
                 final PlaybackTimer playbackTimer;
 
                 playbackTimer = new PlaybackTimer();
                 final JavaFXFrameConverter converter = new JavaFXFrameConverter();
+                final ObjectTracker tracker = new ObjectTracker();
 
                 final ExecutorService imageExecutor = Executors.newSingleThreadExecutor();
 
@@ -103,11 +110,14 @@ public class MainWindowController implements Closeable {
 
                     if (frame.image != null) {
                         final Frame imageFrame = frame.clone();
+                        final Frame maskedFrame = tracker.track(frame);
 
                         imageExecutor.submit(() -> {
                             final Image image = converter.convert(imageFrame);
+                            //final Image maskImage = converter.convert(maskedFrame); // doesn't work
                             final long timeStampDeltaMicros = imageFrame.timestamp - playbackTimer.elapsedMicros();
                             imageFrame.close();
+                            maskedFrame.close();
                             if (timeStampDeltaMicros > 0) {
                                 final long delayMillis = timeStampDeltaMicros / 1000L;
                                 try {
@@ -116,7 +126,11 @@ public class MainWindowController implements Closeable {
                                     Thread.currentThread().interrupt();
                                 }
                             }
-                            Platform.runLater(() -> imageView.setImage(image));
+                            Platform.runLater(() -> {
+                                LOGGER.info("Changing image views...");
+                                cameraImageView.setImage(image);
+                                maskImageView.setImage(image);
+                            });
                         });
                     }
 
@@ -139,7 +153,8 @@ public class MainWindowController implements Closeable {
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, String.format("Exception occured: %s", e.getMessage()), e);
             } finally {
-                stopCapturing();
+                isPlaying = false;
+                LOGGER.info("Capturing ended.");
             }
         });
 
