@@ -1,8 +1,11 @@
 package pl.edu.pk.mech.controller;
 
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
@@ -23,12 +26,21 @@ public class MainWindowController implements Closeable {
     @FXML
     private Button startButton;
     @FXML
+    private Slider thresholdSlider;
+    @FXML
+    private Label sliderValueLabel;
+    @FXML
     private ImageView cameraImageView;
     @FXML
     private ImageView maskImageView;
 
     private volatile Thread playThread;
     private volatile boolean isPlaying = false;
+
+    @FXML
+    public void initialize() {
+        sliderValueLabel.textProperty().bind(Bindings.format("%.0f", thresholdSlider.valueProperty()));
+    }
 
     @Override
     public void close() {
@@ -62,7 +74,7 @@ public class MainWindowController implements Closeable {
     @FXML
     public void buttonOnAction() {
         if (isPlaying) {
-            stopCapturing();
+            isPlaying = false;
             return;
         }
 
@@ -110,11 +122,11 @@ public class MainWindowController implements Closeable {
 
                     if (frame.image != null) {
                         final Frame imageFrame = frame.clone();
-                        final Frame maskedFrame = tracker.track(frame);
+                        final Frame maskedFrame = tracker.track(frame, thresholdSlider.getValue());
 
                         imageExecutor.submit(() -> {
                             final Image image = converter.convert(imageFrame);
-                            //final Image maskImage = converter.convert(maskedFrame); // doesn't work
+                            final Image maskImage = converter.convert(maskedFrame);
                             final long timeStampDeltaMicros = imageFrame.timestamp - playbackTimer.elapsedMicros();
                             imageFrame.close();
                             maskedFrame.close();
@@ -127,9 +139,8 @@ public class MainWindowController implements Closeable {
                                 }
                             }
                             Platform.runLater(() -> {
-                                LOGGER.info("Changing image views...");
                                 cameraImageView.setImage(image);
-                                maskImageView.setImage(image);
+                                maskImageView.setImage(maskImage);
                             });
                         });
                     }
@@ -153,8 +164,7 @@ public class MainWindowController implements Closeable {
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, String.format("Exception occured: %s", e.getMessage()), e);
             } finally {
-                isPlaying = false;
-                LOGGER.info("Capturing ended.");
+                Platform.runLater(this::stopCapturing);
             }
         });
 

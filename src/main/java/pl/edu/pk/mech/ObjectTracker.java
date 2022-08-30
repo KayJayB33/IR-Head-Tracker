@@ -3,9 +3,9 @@ package pl.edu.pk.mech;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
-import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_imgproc.CvMoments;
+import org.opencv.imgproc.Imgproc;
 
 import java.awt.image.BufferedImage;
 import java.util.logging.Logger;
@@ -19,17 +19,10 @@ public class ObjectTracker {
 
     private static final Logger LOGGER = Logger.getLogger(ObjectTracker.class.getName());
 
-    /**
-     * Correct the color range- it depends upon the object, camera quality,
-     * environment.
-     */
-    static CvScalar rgba_min = cvScalar(100, 100, 100, 0);// RED wide dabur birko
-    static CvScalar rgba_max = cvScalar(255, 255, 255, 0);
-
     IplImage image;
     int ii = 0;
 
-    public Frame track(Frame frame) {
+    public Frame track(Frame frame, double thresholdVal) {
         try {
             final OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
             final IplImage img = converter.convert(frame);
@@ -39,8 +32,8 @@ public class ObjectTracker {
 
             if (img != null) {
                 // show image on window
-                cvFlip(img, img, 1);// l-r = 90_degrees_steps_anti_clockwise
-                final IplImage detectThrs = getThresholdImage(img);
+                //cvFlip(img, img, 1);// l-r = 90_degrees_steps_anti_clockwise
+                final IplImage detectThrs = getThresholdImage(img, thresholdVal);
 
                 CvMoments moments = new CvMoments();
                 cvMoments(detectThrs, moments, 1);
@@ -54,7 +47,10 @@ public class ObjectTracker {
                     paint(img, posX, posY);
                 }
 
-                return converter.convert(detectThrs);
+                final IplImage finalImage = cvCreateImage(cvGetSize(detectThrs), 8, 3);
+                cvCvtColor(detectThrs, finalImage, Imgproc.COLOR_GRAY2BGR);
+
+                return converter.convert(finalImage);
             }
         } catch (Exception e) {
             LOGGER.info("Exception: " + e.getMessage());
@@ -73,10 +69,11 @@ public class ObjectTracker {
         LOGGER.info(posX + " , " + posY);
     }
 
-    private IplImage getThresholdImage(IplImage orgImg) {
+    private IplImage getThresholdImage(IplImage orgImg, double thresholdVal) {
         IplImage imgThreshold = cvCreateImage(cvGetSize(orgImg), 8, 1);
         //
-        cvInRangeS(orgImg, rgba_min, rgba_max, imgThreshold);// red
+        cvCvtColor(orgImg, imgThreshold, COLOR_BGR2GRAY);
+        cvThreshold(imgThreshold, imgThreshold, thresholdVal, 255, CV_THRESH_BINARY);// red
 
         cvSmooth(imgThreshold, imgThreshold, CV_MEDIAN, 15, 0, 0, 0);
         //cvSaveImage(++ii + "dsmthreshold.jpg", imgThreshold);
