@@ -1,5 +1,6 @@
 package pl.edu.pk.mech;
 
+import javafx.scene.canvas.GraphicsContext;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
@@ -19,21 +20,26 @@ public class ObjectTracker {
 
     private static final Logger LOGGER = Logger.getLogger(ObjectTracker.class.getName());
 
-    IplImage image;
-    int ii = 0;
+    private static final OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
 
-    public Frame track(Frame frame, double thresholdVal) {
+    private Frame thresholdFrame;
+    private Frame markedFrame;
+    private IplImage iplImage;
+
+    private int ii = 0;
+    private int posX;
+    private int posY;
+    private double scale;
+
+    public Frame track(GraphicsContext gc, Frame frame, double thresholdVal) {
         try {
-            final OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
-            final IplImage img = converter.convert(frame);
+            iplImage = converter.convert(frame);
+            scale = gc.getCanvas().getWidth() / iplImage.width();
 
-            int posX = 0;
-            int posY = 0;
-
-            if (img != null) {
+            if (iplImage != null) {
                 // show image on window
                 //cvFlip(img, img, 1);// l-r = 90_degrees_steps_anti_clockwise
-                final IplImage detectThrs = getThresholdImage(img, thresholdVal);
+                final IplImage detectThrs = getThresholdImage(iplImage, thresholdVal);
 
                 CvMoments moments = new CvMoments();
                 cvMoments(detectThrs, moments, 1);
@@ -42,10 +48,6 @@ public class ObjectTracker {
                 double area = cvGetCentralMoment(moments, 0, 0);
                 posX = (int) (mom10 / area);
                 posY = (int) (mom01 / area);
-                // only if its a valid position
-                if (posX > 0 && posY > 0) {
-                    paint(img, posX, posY);
-                }
 
                 final IplImage finalImage = cvCreateImage(cvGetSize(detectThrs), 8, 3);
                 cvCvtColor(detectThrs, finalImage, Imgproc.COLOR_GRAY2BGR);
@@ -59,14 +61,14 @@ public class ObjectTracker {
         return null;
     }
 
-    private void paint(IplImage img, int posX, int posY) {
-//        Graphics g = jp.getGraphics();
-//        path.setSize(img.width(), img.height());
-//        // g.clearRect(0, 0, img.width(), img.height());
-//        g.setColor(Color.RED);
-//        // g.fillOval(posX, posY, 20, 20);
-//        g.drawOval(posX, posY, 20, 20);
-        LOGGER.info(posX + " , " + posY);
+    public double getPosX() {
+        if (posX <= 0) return -1;
+        return posX * scale;
+    }
+
+    public double getPosY() {
+        if (posY <= 0) return -1;
+        return posY * scale;
     }
 
     private IplImage getThresholdImage(IplImage orgImg, double thresholdVal) {
@@ -91,4 +93,5 @@ public class ObjectTracker {
         cvEqualizeHist(srcimg, destimg);
         return destimg;
     }
+
 }

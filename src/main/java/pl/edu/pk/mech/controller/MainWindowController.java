@@ -3,11 +3,14 @@ package pl.edu.pk.mech.controller;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.JavaFXFrameConverter;
@@ -30,9 +33,11 @@ public class MainWindowController implements Closeable {
     @FXML
     private Label sliderValueLabel;
     @FXML
-    private ImageView cameraImageView;
-    @FXML
     private ImageView maskImageView;
+    @FXML
+    private Canvas canvas;
+
+    private GraphicsContext gc;
 
     private volatile Thread playThread;
     private volatile boolean isPlaying = false;
@@ -40,6 +45,7 @@ public class MainWindowController implements Closeable {
     @FXML
     public void initialize() {
         sliderValueLabel.textProperty().bind(Bindings.format("%.0f", thresholdSlider.valueProperty()));
+        gc = canvas.getGraphicsContext2D();
     }
 
     @Override
@@ -121,15 +127,21 @@ public class MainWindowController implements Closeable {
                     lastTimeStamp = frame.timestamp;
 
                     if (frame.image != null) {
+                        final double thresholdValue = thresholdSlider.getValue();
                         final Frame imageFrame = frame.clone();
-                        final Frame maskedFrame = tracker.track(frame, thresholdSlider.getValue());
+                        final Frame thresholdFrame = tracker.track(canvas.getGraphicsContext2D(),
+                                imageFrame, thresholdValue);
+                        final double x = tracker.getPosX();
+                        final double y = tracker.getPosY();
 
                         imageExecutor.submit(() -> {
                             final Image image = converter.convert(imageFrame);
-                            final Image maskImage = converter.convert(maskedFrame);
+                            final Image thresholdImage = converter.convert(thresholdFrame);
                             final long timeStampDeltaMicros = imageFrame.timestamp - playbackTimer.elapsedMicros();
+
                             imageFrame.close();
-                            maskedFrame.close();
+                            thresholdFrame.close();
+
                             if (timeStampDeltaMicros > 0) {
                                 final long delayMillis = timeStampDeltaMicros / 1000L;
                                 try {
@@ -139,8 +151,12 @@ public class MainWindowController implements Closeable {
                                 }
                             }
                             Platform.runLater(() -> {
-                                cameraImageView.setImage(image);
-                                maskImageView.setImage(maskImage);
+                                gc.drawImage(image, 0, 0, canvas.getWidth(), canvas.getHeight());
+                                if (x > 0 && y > 0) {
+                                    gc.setStroke(Color.RED);
+                                    gc.strokeOval(x, y, 20, 20);
+                                }
+                                maskImageView.setImage(thresholdImage);
                             });
                         });
                     }
