@@ -3,17 +3,18 @@ package pl.edu.pk.mech.controller;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.paint.Color;
+import javafx.scene.layout.BorderPane;
+import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.JavaFXFrameConverter;
+import org.bytedeco.opencv.opencv_java;
 import pl.edu.pk.mech.App;
 import pl.edu.pk.mech.ObjectTracker;
 
@@ -27,25 +28,27 @@ import java.util.logging.Logger;
 public class MainWindowController implements Closeable {
 
     @FXML
+    private BorderPane borderPane;
+    @FXML
+    private SplitPane splitPane;
+    @FXML
     private Button startButton;
     @FXML
     private Slider thresholdSlider;
     @FXML
     private Label sliderValueLabel;
     @FXML
-    private ImageView maskImageView;
+    private ImageView cameraView;
     @FXML
-    private Canvas canvas;
-
-    private GraphicsContext gc;
+    private ImageView thresholdView;
 
     private volatile Thread playThread;
     private volatile boolean isPlaying = false;
 
     @FXML
     public void initialize() {
+        Loader.load(opencv_java.class);
         sliderValueLabel.textProperty().bind(Bindings.format("%.0f", thresholdSlider.valueProperty()));
-        gc = canvas.getGraphicsContext2D();
     }
 
     @Override
@@ -127,12 +130,10 @@ public class MainWindowController implements Closeable {
                     lastTimeStamp = frame.timestamp;
 
                     if (frame.image != null) {
-                        final double thresholdValue = thresholdSlider.getValue();
                         final Frame imageFrame = frame.clone();
-                        final Frame thresholdFrame = tracker.track(canvas.getGraphicsContext2D(),
-                                imageFrame, thresholdValue);
-                        final double x = tracker.getPosX();
-                        final double y = tracker.getPosY();
+                        final Frame thresholdFrame = imageFrame.clone();
+
+                        tracker.track(thresholdFrame, thresholdSlider.getValue());
 
                         imageExecutor.submit(() -> {
                             final Image image = converter.convert(imageFrame);
@@ -151,12 +152,8 @@ public class MainWindowController implements Closeable {
                                 }
                             }
                             Platform.runLater(() -> {
-                                gc.drawImage(image, 0, 0, canvas.getWidth(), canvas.getHeight());
-                                if (x > 0 && y > 0) {
-                                    gc.setStroke(Color.RED);
-                                    gc.strokeOval(x, y, 20, 20);
-                                }
-                                maskImageView.setImage(thresholdImage);
+                                cameraView.setImage(image);
+                                thresholdView.setImage(thresholdImage);
                             });
                         });
                     }
