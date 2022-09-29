@@ -131,17 +131,16 @@ public class MainWindowController implements Closeable {
 
                     if (frame.image != null) {
                         final Frame imageFrame = frame.clone();
-                        final Frame thresholdFrame = imageFrame.clone();
+                        final Frame binaryFrame = tracker.track(imageFrame, thresholdSlider.getValue());
 
-                        tracker.track(thresholdFrame, thresholdSlider.getValue());
+                        final Image image = converter.convert(imageFrame);
+                        final Image thresholdImage = converter.convert(binaryFrame);
 
                         imageExecutor.submit(() -> {
-                            final Image image = converter.convert(imageFrame);
-                            final Image thresholdImage = converter.convert(thresholdFrame);
                             final long timeStampDeltaMicros = imageFrame.timestamp - playbackTimer.elapsedMicros();
 
                             imageFrame.close();
-                            thresholdFrame.close();
+                            binaryFrame.close();
 
                             if (timeStampDeltaMicros > 0) {
                                 final long delayMillis = timeStampDeltaMicros / 1000L;
