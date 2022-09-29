@@ -34,9 +34,7 @@ public class ObjectTracker {
         findContours(binary, contours, hierarchy, RETR_TREE,
                 CHAIN_APPROX_SIMPLE);
         // Drawing the Contours
-        final Scalar color = new Scalar(0, 0, 255);
-//        Imgproc.drawContours(src, contours, -1, color, 2, Imgproc.LINE_8,
-//                hierarchy, 2, new Point());
+        final Scalar color = new Scalar(0, 0, 255); // RED
 
         // Drawing cross in the centers of the contours
         for (final MatOfPoint contour : contours) {
@@ -54,6 +52,8 @@ public class ObjectTracker {
 
         // Converting image to 3 channels for JavaFX
         cvtColor(binary, binary, COLOR_GRAY2BGR);
+        drawContours(binary, contours, -1, color, 2, LINE_4,
+                hierarchy, 2, new Point());
 
         return converter.convert(binary);
     }
