@@ -59,8 +59,8 @@ public class ObjectTracker {
                 final Point2f point = points.get(i);
                 //circle(src, new Point(cX, cY), 7, color,-1);
                 drawCross(src, point.x(), point.y());
-                putText(src, String.format("#%d", i+1), new Point(point.x() - 40, point.y() - 40),
-                        FONT_HERSHEY_SIMPLEX, 1, RED_COLOR, 2);
+                putText(src, String.format("#%d %.1fpx", i+1, contourArea(contours.get(i))), new Point(point.x() - 40, point.y() - 40),
+                        FONT_HERSHEY_SIMPLEX, 0.8, RED_COLOR, 2);
             }
         }
 
