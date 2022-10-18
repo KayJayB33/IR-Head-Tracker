@@ -75,7 +75,7 @@ public class VideoTrackingThread extends Thread {
 
                 if (frame.image != null) {
                     final Frame imageFrame = frame.clone();
-                    final Frame binaryFrame = tracker.track(imageFrame, controller.getSliderValue());
+                    final Frame binaryFrame = tracker.track(imageFrame, (float) controller.getSliderValue());
 
                     final Image image = converter.convert(imageFrame);
                     final Image thresholdImage = converter.convert(binaryFrame);
@@ -122,11 +122,11 @@ public class VideoTrackingThread extends Thread {
         } finally {
             LOGGER.info("Stopping thread...");
             stopCapturing();
-            Platform.runLater(controller::updateButtonText);
         }
     }
 
     public void stopCapturing() {
+        Platform.runLater(controller::updateButtonText);
         isPlaying = false;
     }
 

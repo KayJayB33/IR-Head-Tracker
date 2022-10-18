@@ -5,10 +5,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
-import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.opencv.opencv_java;
 import pl.edu.pk.mech.VideoTrackingThread;
@@ -18,10 +16,6 @@ import java.util.logging.Logger;
 
 public class MainWindowController implements Closeable {
 
-    @FXML
-    private BorderPane borderPane;
-    @FXML
-    private SplitPane splitPane;
     @FXML
     private Button startButton;
     @FXML
@@ -46,7 +40,6 @@ public class MainWindowController implements Closeable {
     @Override
     public void close() {
         if (playThread != null) {
-            playThread.interrupt();
             playThread.stopCapturing();
         }
     }
