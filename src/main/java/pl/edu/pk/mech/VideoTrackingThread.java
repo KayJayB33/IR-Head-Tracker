@@ -75,10 +75,16 @@ public class VideoTrackingThread extends Thread {
 
                 if (frame.image != null) {
                     final Frame imageFrame = frame.clone();
-                    final Frame binaryFrame = tracker.track(imageFrame, (float) controller.getSliderValue());
+                    final Frame binaryFrame = tracker.track(
+                            imageFrame,
+                            (float) controller.getThresholdValue(),
+                            (float) controller.getMinRadiusValue(),
+                            (float) controller.getMaxRadiusValue());
 
                     final Image image = converter.convert(imageFrame);
                     final Image thresholdImage = converter.convert(binaryFrame);
+
+                    Platform.runLater(() -> controller.updateDetectedAmount(tracker.getDetectedAmount()));
 
                     imageExecutor.submit(() -> {
                         final long timeStampDeltaMicros = imageFrame.timestamp - playbackTimer.elapsedMicros();

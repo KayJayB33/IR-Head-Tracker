@@ -7,6 +7,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.opencv.opencv_java;
 import pl.edu.pk.mech.VideoTrackingThread;
@@ -21,7 +22,17 @@ public class MainWindowController implements Closeable {
     @FXML
     private Slider thresholdSlider;
     @FXML
-    private Label sliderValueLabel;
+    private Label thresholdValue;
+    @FXML
+    private Slider minRadiusSlider;
+    @FXML
+    private Label minRadiusValue;
+    @FXML
+    private Slider maxRadiusSlider;
+    @FXML
+    private Label maxRadiusValue;
+    @FXML
+    private Label detectedAmountLabel;
     @FXML
     private ImageView cameraView;
     @FXML
@@ -34,7 +45,12 @@ public class MainWindowController implements Closeable {
     @FXML
     public void initialize() {
         Loader.load(opencv_java.class);
-        sliderValueLabel.textProperty().bind(Bindings.format("%.0f", thresholdSlider.valueProperty()));
+        thresholdValue.textProperty().bind(Bindings.format("%.0f", thresholdSlider.valueProperty()));
+        minRadiusValue.textProperty().bind(Bindings.format("%.1f px", minRadiusSlider.valueProperty()));
+        maxRadiusValue.textProperty().bind(Bindings.format("%.1f px", maxRadiusSlider.valueProperty()));
+
+        minRadiusSlider.maxProperty().bind(maxRadiusSlider.valueProperty());
+        maxRadiusSlider.minProperty().bind(minRadiusSlider.valueProperty());
     }
 
     @Override
@@ -57,6 +73,7 @@ public class MainWindowController implements Closeable {
     public void stopCapturing() {
         LOGGER.info("Stopping capturing...");
 
+        detectedAmountLabel.setText("");
         playThread.stopCapturing();
     }
 
@@ -67,8 +84,7 @@ public class MainWindowController implements Closeable {
         playThread.start();
     }
 
-    public void updateButtonText()
-    {
+    public void updateButtonText() {
         if(startButton.getText().equals("Start"))
         {
             startButton.setText("Stop");
@@ -78,9 +94,31 @@ public class MainWindowController implements Closeable {
         startButton.setText("Start");
     }
 
-    public double getSliderValue()
+    public void updateDetectedAmount(int amount) {
+        final String text = String.format("Detected objects: %d", amount);
+
+        if(amount != 3) {
+            detectedAmountLabel.setTextFill(Color.RED);
+        } else {
+            detectedAmountLabel.setTextFill(Color.BLACK);
+        }
+
+        detectedAmountLabel.setText(text);
+    }
+
+    public double getThresholdValue()
     {
         return thresholdSlider.getValue();
+    }
+
+    public double getMinRadiusValue()
+    {
+        return minRadiusSlider.getValue();
+    }
+
+    public double getMaxRadiusValue()
+    {
+        return maxRadiusSlider.getValue();
     }
 
     public void updateViews(final Image ...images)
