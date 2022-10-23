@@ -42,96 +42,102 @@ public class VideoTrackingThread extends Thread {
 
     @Override
     public void run() {
-        try (final FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(App.VIDEO_FILE);
-             final JavaFXFrameConverter converter = new JavaFXFrameConverter()) {
+        Platform.runLater(controller::updateButtonText);
+        do {
+            try (final FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(App.VIDEO_FILE);
+                 final JavaFXFrameConverter converter = new JavaFXFrameConverter()) {
 
-            grabber.start();
+                grabber.start();
 
-            LOGGER.info("Capturing started...");
-            isPlaying = true;
-            Platform.runLater(controller::updateButtonText);
+                LOGGER.info("Capturing started...");
+                isPlaying = true;
 
-            final PlaybackTimer playbackTimer;
+                final PlaybackTimer playbackTimer;
 
-            playbackTimer = new PlaybackTimer();
+                playbackTimer = new PlaybackTimer();
 
-            final ObjectTracker tracker = new ObjectTracker();
+                final ObjectTracker tracker = new ObjectTracker();
 
-            final ExecutorService imageExecutor = Executors.newSingleThreadExecutor();
+                final ExecutorService imageExecutor = Executors.newSingleThreadExecutor();
 
-            final long maxReadAheadBufferMicros = 1000 * 1000L;
+                final long maxReadAheadBufferMicros = 1000 * 1000L;
 
-            long lastTimeStamp = -1L;
-            while (isPlaying && !Thread.interrupted()) {
-                final Frame frame = grabber.grab();
-                if (frame == null) {
-                    break;
-                }
+                long lastTimeStamp = -1L;
+                while (isPlaying && !Thread.interrupted()) {
+                    final Frame frame = grabber.grab();
+                    if (frame == null) {
+                        break;
+                    }
 
-                if (lastTimeStamp < 0) {
-                    playbackTimer.start();
-                }
-                lastTimeStamp = frame.timestamp;
+                    if (lastTimeStamp < 0) {
+                        playbackTimer.start();
+                    }
+                    lastTimeStamp = frame.timestamp;
 
-                if (frame.image != null) {
-                    final Frame imageFrame = frame.clone();
-                    final Frame binaryFrame = tracker.track(
-                            imageFrame,
-                            (float) controller.getThresholdValue(),
-                            (float) controller.getMinRadiusValue(),
-                            (float) controller.getMaxRadiusValue());
+                    if (frame.image != null) {
+                        final Frame imageFrame = frame.clone();
+                        final Frame binaryFrame = tracker.track(
+                                imageFrame,
+                                (float) controller.getThresholdValue(),
+                                (float) controller.getMinRadiusValue(),
+                                (float) controller.getMaxRadiusValue());
 
-                    final Image image = converter.convert(imageFrame);
-                    final Image thresholdImage = converter.convert(binaryFrame);
+                        final Image image = converter.convert(imageFrame);
+                        final Image thresholdImage = converter.convert(binaryFrame);
 
-                    Platform.runLater(() -> controller.updateDetectedAmount(tracker.getDetectedAmount()));
+                        Platform.runLater(() -> controller.updateDetectedAmount(tracker.getDetectedAmount()));
 
-                    imageExecutor.submit(() -> {
-                        final long timeStampDeltaMicros = imageFrame.timestamp - playbackTimer.elapsedMicros();
+                        imageExecutor.submit(() -> {
+                            final long timeStampDeltaMicros = imageFrame.timestamp - playbackTimer.elapsedMicros();
 
-                        imageFrame.close();
-                        binaryFrame.close();
+                            imageFrame.close();
+                            binaryFrame.close();
 
-                        if (timeStampDeltaMicros > 0) {
-                            final long delayMillis = timeStampDeltaMicros / 1000L;
-                            try {
-                                Thread.sleep(delayMillis);
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
+                            if (timeStampDeltaMicros > 0) {
+                                final long delayMillis = timeStampDeltaMicros / 1000L;
+                                try {
+                                    Thread.sleep(delayMillis);
+                                } catch (InterruptedException e) {
+                                    Thread.currentThread().interrupt();
+                                }
                             }
-                        }
 
-                        Platform.runLater(() -> controller.updateViews(image, thresholdImage));
-                    });
+                            Platform.runLater(() -> controller.updateViews(image, thresholdImage));
+                        });
+                    }
+
+                    final long timeStampDeltaMicros = frame.timestamp - playbackTimer.elapsedMicros();
+                    if (timeStampDeltaMicros > maxReadAheadBufferMicros) {
+                        Thread.sleep((timeStampDeltaMicros - maxReadAheadBufferMicros) / 1000);
+                    }
                 }
 
-                final long timeStampDeltaMicros = frame.timestamp - playbackTimer.elapsedMicros();
-                if (timeStampDeltaMicros > maxReadAheadBufferMicros) {
-                    Thread.sleep((timeStampDeltaMicros - maxReadAheadBufferMicros) / 1000);
+                if (!Thread.interrupted()) {
+                    long delay = (lastTimeStamp - playbackTimer.elapsedMicros()) / 1000 +
+                            Math.round(1 / grabber.getFrameRate() * 1000);
+                    Thread.sleep(Math.max(0, delay));
                 }
+
+                grabber.stop();
+                grabber.release();
+
+                imageExecutor.shutdownNow();
+                imageExecutor.awaitTermination(5, TimeUnit.SECONDS);
+
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, String.format("Exception occured: %s", e.getMessage()), e);
+                stopCapturing();
             }
+            LOGGER.info("Capturing ended...");
 
-            if (!Thread.interrupted()) {
-                long delay = (lastTimeStamp - playbackTimer.elapsedMicros()) / 1000 +
-                        Math.round(1 / grabber.getFrameRate() * 1000);
-                Thread.sleep(Math.max(0, delay));
+            if(isPlaying) {
+                LOGGER.info("Playing in a loop...");
             }
-
-            grabber.stop();
-            grabber.release();
-
-            imageExecutor.shutdownNow();
-            imageExecutor.awaitTermination(5, TimeUnit.SECONDS);
-
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, String.format("Exception occured: %s", e.getMessage()), e);
-        } finally {
-            LOGGER.info("Stopping thread...");
-            stopCapturing();
-        }
+        } while(isPlaying);
     }
 
     public void stopCapturing() {
+        LOGGER.info("Stopping thread...");
         Platform.runLater(controller::updateButtonText);
         isPlaying = false;
     }
