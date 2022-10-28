@@ -6,6 +6,8 @@ import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.JavaFXFrameConverter;
 import pl.edu.pk.mech.controller.MainWindowController;
+import pl.edu.pk.mech.tracking.BlobTracker;
+import pl.edu.pk.mech.tracking.ITracker;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,7 +58,7 @@ public class VideoTrackingThread extends Thread {
 
                 playbackTimer = new PlaybackTimer();
 
-                final ObjectTracker tracker = new ObjectTracker();
+                final ITracker tracker = new BlobTracker();
 
                 final ExecutorService imageExecutor = Executors.newSingleThreadExecutor();
 

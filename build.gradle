@@ -18,7 +18,7 @@ dependencies {
 }
 
 application {
-    mainClass = 'pl.edu.pk.mech.Main'
+    mainClass = 'pl.edu.pk.mech.Launcher'
 }
 
 javafx {

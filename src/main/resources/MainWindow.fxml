@@ -13,17 +13,23 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.edu.pk.mech.controller.MainWindowController">
+<BorderPane fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="pl.edu.pk.mech.controller.MainWindowController">
     <center>
-        <SplitPane fx:id="splitPane" dividerPositions="0.5" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" BorderPane.alignment="CENTER">
+        <SplitPane fx:id="splitPane" dividerPositions="0.5" maxHeight="1.7976931348623157E308"
+                   maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity"
+                   BorderPane.alignment="CENTER">
             <items>
-                <ImageView fx:id="cameraView" fitHeight="450.0" fitWidth="490.0" pickOnBounds="true" preserveRatio="true" />
-                <ImageView fx:id="thresholdView" fitHeight="450.0" fitWidth="490.0" pickOnBounds="true" preserveRatio="true" />
+                <ImageView fx:id="cameraView" fitHeight="450.0" fitWidth="490.0" pickOnBounds="true"
+                           preserveRatio="true"/>
+                <ImageView fx:id="thresholdView" fitHeight="450.0" fitWidth="490.0" pickOnBounds="true"
+                           preserveRatio="true"/>
             </items>
         </SplitPane>
     </center>
-   <left>
-      <VBox alignment="CENTER" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+    <left>
+        <VBox alignment="CENTER" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
             <Label fx:id="detectedAmountLabel">
                <font>
