@@ -71,6 +71,7 @@ public class ContourTracker implements ITracker {
 
         // Converting image to 3 channels for JavaFX
         cvtColor(binary, binary, COLOR_GRAY2BGR);
+        drawContours(binary, contours, -1, RED_COLOR, 2);
         return CONVERTER.convert(binary);
     }
 

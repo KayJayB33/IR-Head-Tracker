@@ -10,8 +10,10 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static org.bytedeco.opencv.global.opencv_features2d.DRAW_RICH_KEYPOINTS;
+import static org.opencv.core.Core.bitwise_not;
+import static org.opencv.features2d.Features2d.drawKeypoints;
 import static org.opencv.imgproc.Imgproc.*;
-import static org.opencv.imgproc.Imgproc.COLOR_GRAY2BGR;
 
 public class BlobTracker implements ITracker {
 
@@ -40,7 +42,7 @@ public class BlobTracker implements ITracker {
         // Converting source image to grayscale
         final Mat gray = new Mat(src.rows(), src.cols(), src.type());
         cvtColor(src, gray, COLOR_BGR2GRAY);
-        Core.bitwise_not(gray, gray);
+        bitwise_not(gray, gray);
 
         // Binary image for visualisation
         final Mat binary = new Mat(src.rows(), src.cols(), src.type(), new Scalar(0));
@@ -79,7 +81,9 @@ public class BlobTracker implements ITracker {
         }
 
         // Converting image to 3 channels for JavaFX
+        bitwise_not(binary, binary);
         cvtColor(binary, binary, COLOR_GRAY2BGR);
+        drawKeypoints(binary, keypoints, binary, RED_COLOR, DRAW_RICH_KEYPOINTS);
         return CONVERTER.convert(binary);
     }
 
