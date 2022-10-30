@@ -16,27 +16,10 @@ import java.util.logging.Logger;
 
 public class VideoTrackingThread extends Thread {
 
-    private final MainWindowController controller;
-    private ITracker tracker;
-    private volatile boolean isPlaying = false;
-
     private static final Logger LOGGER = Logger.getLogger(VideoTrackingThread.class.getName());
-
-    private static class PlaybackTimer {
-        private Long startTime = -1L;
-
-        public void start() {
-            startTime = System.nanoTime();
-        }
-
-        public long elapsedMicros() {
-            if (startTime < 0) {
-                throw new IllegalStateException("PlaybackTimer not initialized.");
-            }
-
-            return (System.nanoTime() - startTime) / 1000;
-        }
-    }
+    private final MainWindowController controller;
+    private final ITracker tracker;
+    private volatile boolean isPlaying = false;
 
     public VideoTrackingThread(final MainWindowController controller, final ITracker tracker) {
         this.controller = controller;
@@ -131,10 +114,10 @@ public class VideoTrackingThread extends Thread {
             }
             LOGGER.info("Capturing ended...");
 
-            if(isPlaying) {
+            if (isPlaying) {
                 LOGGER.info("Playing in a loop...");
             }
-        } while(isPlaying);
+        } while (isPlaying);
     }
 
     public void stopCapturing() {
@@ -145,5 +128,21 @@ public class VideoTrackingThread extends Thread {
 
     public boolean isPlaying() {
         return isPlaying;
+    }
+
+    private static class PlaybackTimer {
+        private Long startTime = -1L;
+
+        public void start() {
+            startTime = System.nanoTime();
+        }
+
+        public long elapsedMicros() {
+            if (startTime < 0) {
+                throw new IllegalStateException("PlaybackTimer not initialized.");
+            }
+
+            return (System.nanoTime() - startTime) / 1000;
+        }
     }
 }

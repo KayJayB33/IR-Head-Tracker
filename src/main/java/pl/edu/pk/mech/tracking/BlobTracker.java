@@ -1,7 +1,11 @@
 package pl.edu.pk.mech.tracking;
 
 import org.bytedeco.javacv.Frame;
-import org.opencv.core.*;
+import org.opencv.core.KeyPoint;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfKeyPoint;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
 import org.opencv.features2d.SimpleBlobDetector;
 import org.opencv.features2d.SimpleBlobDetector_Params;
 
@@ -13,11 +17,18 @@ import java.util.stream.Collectors;
 import static org.bytedeco.opencv.global.opencv_features2d.DRAW_RICH_KEYPOINTS;
 import static org.opencv.core.Core.bitwise_not;
 import static org.opencv.features2d.Features2d.drawKeypoints;
-import static org.opencv.imgproc.Imgproc.*;
+import static org.opencv.imgproc.Imgproc.COLOR_BGR2GRAY;
+import static org.opencv.imgproc.Imgproc.COLOR_GRAY2BGR;
+import static org.opencv.imgproc.Imgproc.FONT_HERSHEY_SIMPLEX;
+import static org.opencv.imgproc.Imgproc.THRESH_BINARY;
+import static org.opencv.imgproc.Imgproc.cvtColor;
+import static org.opencv.imgproc.Imgproc.putText;
+import static org.opencv.imgproc.Imgproc.threshold;
 
 public class BlobTracker implements ITracker {
 
     private static final SimpleBlobDetector_Params params = new SimpleBlobDetector_Params();
+    private static final Logger LOGGER = Logger.getLogger(BlobTracker.class.getName());
 
     static {
         params.set_filterByArea(true);
@@ -27,8 +38,6 @@ public class BlobTracker implements ITracker {
 
     private SimpleBlobDetector detector = SimpleBlobDetector.create(params);
     private List<KeyPoint> keypointsList;
-
-    private static final Logger LOGGER = Logger.getLogger(BlobTracker.class.getName());
 
     @Override
     public Frame track(final Frame frame, final float threshold, final float minRadius, final float maxRadius) {
