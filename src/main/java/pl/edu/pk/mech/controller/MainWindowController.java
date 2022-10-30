@@ -69,7 +69,7 @@ public class MainWindowController implements Closeable {
         maxRadiusSlider.minProperty().bind(minRadiusSlider.valueProperty());
 
         trackerComboBox.getItems().addAll(trackers.keySet());
-        trackerComboBox.getSelectionModel().selectFirst();
+        trackerComboBox.getSelectionModel().select(ContourTracker.class.getSimpleName());
     }
 
     @Override

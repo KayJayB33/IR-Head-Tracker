@@ -58,7 +58,7 @@ public class BlobTracker implements ITracker {
                 .collect(Collectors.toList());
 
         if (keypointsList.size() == 3) {
-            HeadPoseEstimator.estimate(frame, detectedPoints);
+            HeadPoseEstimator.estimate(src, detectedPoints);
             // Sorting keypoints (assuming there are only 3)
             keypointsList.sort(Comparator.comparingDouble(kp -> kp.pt.y));
             keypointsList.subList(1, keypointsList.size()).sort(Comparator.comparingDouble(kp -> kp.pt.x));

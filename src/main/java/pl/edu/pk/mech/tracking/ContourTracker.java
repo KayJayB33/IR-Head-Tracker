@@ -9,15 +9,12 @@ import org.opencv.imgproc.Moments;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import static org.opencv.imgproc.Imgproc.*;
 
 public class ContourTracker implements ITracker {
 
-    private List<Point> points = new ArrayList<>();
-
-    private static final Logger LOGGER = Logger.getLogger(ContourTracker.class.getName());
+    private final List<Point> points = new ArrayList<>();
 
     @Override
     public Frame track(final Frame frame, final float threshold, final float minRadius, final float maxRadius) {
@@ -56,7 +53,7 @@ public class ContourTracker implements ITracker {
         }
 
         if (points.size() == 3) {
-            HeadPoseEstimator.estimate(frame, points);
+            HeadPoseEstimator.estimate(src, points);
         }
 
         for (int i = 0; i < points.size(); i++) {

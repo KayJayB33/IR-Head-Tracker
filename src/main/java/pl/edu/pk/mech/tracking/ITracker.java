@@ -9,6 +9,9 @@ import org.opencv.core.Scalar;
 import static org.opencv.imgproc.Imgproc.line;
 
 public interface ITracker {
+
+    Scalar BLUE_COLOR = new Scalar(255, 0, 0);
+    Scalar GREEN_COLOR = new Scalar(0, 255, 0);
     Scalar RED_COLOR = new Scalar(0, 0, 255);
     OpenCVFrameConverter.ToOrgOpenCvCoreMat CONVERTER
             = new OpenCVFrameConverter.ToOrgOpenCvCoreMat();
