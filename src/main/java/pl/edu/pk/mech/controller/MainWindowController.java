@@ -3,6 +3,7 @@ package pl.edu.pk.mech.controller;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
@@ -11,14 +12,20 @@ import javafx.scene.paint.Color;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.opencv.opencv_java;
 import pl.edu.pk.mech.VideoTrackingThread;
+import pl.edu.pk.mech.tracking.BlobTracker;
+import pl.edu.pk.mech.tracking.ContourTracker;
+import pl.edu.pk.mech.tracking.ITracker;
 
 import java.io.Closeable;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public class MainWindowController implements Closeable {
 
     @FXML
     private Button startButton;
+    @FXML
+    private ComboBox<String> trackerComboBox;
     @FXML
     private Slider thresholdSlider;
     @FXML
@@ -40,17 +47,29 @@ public class MainWindowController implements Closeable {
 
     private volatile VideoTrackingThread playThread;
 
+    public Map<String, ITracker> trackers;
+
     private static final Logger LOGGER = Logger.getLogger(MainWindowController.class.getName());
 
     @FXML
     public void initialize() {
         Loader.load(opencv_java.class);
+        trackers = Map.of(
+                ContourTracker.class.getSimpleName(),
+                new ContourTracker(),
+                BlobTracker.class.getSimpleName(),
+                new BlobTracker()
+        );
+
         thresholdValue.textProperty().bind(Bindings.format("%.0f", thresholdSlider.valueProperty()));
         minRadiusValue.textProperty().bind(Bindings.format("%.1f px", minRadiusSlider.valueProperty()));
         maxRadiusValue.textProperty().bind(Bindings.format("%.1f px", maxRadiusSlider.valueProperty()));
 
         minRadiusSlider.maxProperty().bind(maxRadiusSlider.valueProperty());
         maxRadiusSlider.minProperty().bind(minRadiusSlider.valueProperty());
+
+        trackerComboBox.getItems().addAll(trackers.keySet());
+        trackerComboBox.getSelectionModel().selectFirst();
     }
 
     @Override
@@ -80,18 +99,19 @@ public class MainWindowController implements Closeable {
     public void startCapturing() {
         LOGGER.info("Starting capturing...");
 
-        playThread = new VideoTrackingThread(this);
+        playThread = new VideoTrackingThread(this, trackers.get(trackerComboBox.getValue()));
         playThread.start();
     }
 
-    public void updateButtonText() {
-        if(startButton.getText().equals("Start"))
-        {
+    public void updateInterface() {
+        if (startButton.getText().equals("Start")) {
             startButton.setText("Stop");
+            trackerComboBox.setDisable(true);
             return;
         }
 
         startButton.setText("Start");
+        trackerComboBox.setDisable(false);
     }
 
     public void updateDetectedAmount(int amount) {

@@ -6,7 +6,6 @@ import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.JavaFXFrameConverter;
 import pl.edu.pk.mech.controller.MainWindowController;
-import pl.edu.pk.mech.tracking.BlobTracker;
 import pl.edu.pk.mech.tracking.ITracker;
 
 import java.util.concurrent.ExecutorService;
@@ -18,6 +17,7 @@ import java.util.logging.Logger;
 public class VideoTrackingThread extends Thread {
 
     private final MainWindowController controller;
+    private ITracker tracker;
     private volatile boolean isPlaying = false;
 
     private static final Logger LOGGER = Logger.getLogger(VideoTrackingThread.class.getName());
@@ -38,13 +38,14 @@ public class VideoTrackingThread extends Thread {
         }
     }
 
-    public VideoTrackingThread(final MainWindowController controller) {
+    public VideoTrackingThread(final MainWindowController controller, final ITracker tracker) {
         this.controller = controller;
+        this.tracker = tracker;
     }
 
     @Override
     public void run() {
-        Platform.runLater(controller::updateButtonText);
+        Platform.runLater(controller::updateInterface);
         do {
             try (final FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(App.VIDEO_FILE);
                  final JavaFXFrameConverter converter = new JavaFXFrameConverter()) {
@@ -57,8 +58,6 @@ public class VideoTrackingThread extends Thread {
                 final PlaybackTimer playbackTimer;
 
                 playbackTimer = new PlaybackTimer();
-
-                final ITracker tracker = new BlobTracker();
 
                 final ExecutorService imageExecutor = Executors.newSingleThreadExecutor();
 
@@ -140,7 +139,7 @@ public class VideoTrackingThread extends Thread {
 
     public void stopCapturing() {
         LOGGER.info("Stopping thread...");
-        Platform.runLater(controller::updateButtonText);
+        Platform.runLater(controller::updateInterface);
         isPlaying = false;
     }
 

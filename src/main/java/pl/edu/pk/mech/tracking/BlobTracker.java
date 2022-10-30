@@ -19,7 +19,7 @@ public class BlobTracker implements ITracker {
 
     static {
         params.set_filterByArea(true);
-        params.set_maxThreshold(256);
+        params.set_maxThreshold(256); // maxThreshold is exclusive value
         params.set_filterByColor(true);
     }
 
@@ -67,7 +67,7 @@ public class BlobTracker implements ITracker {
         for (int i = 0; i < keypointsList.size(); i++) {
             final KeyPoint keypoint = keypointsList.get(i);
             final Point point = keypoint.pt;
-            final float radius = (float) Math.sqrt(keypoint.size / Math.PI);
+            final float radius = keypoint.size / 2;
             ITracker.drawCross(src, point.x, point.y);
             putText(src,
                     String.format("#%d %.1fpx", i + 1, radius),
