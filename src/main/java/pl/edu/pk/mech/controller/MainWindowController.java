@@ -9,9 +9,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
-import org.bytedeco.javacpp.Loader;
-import org.bytedeco.opencv.opencv_java;
-import pl.edu.pk.mech.VideoTrackingThread;
+import pl.edu.pk.mech.DemoTrackingThread;
 import pl.edu.pk.mech.tracking.BlobTracker;
 import pl.edu.pk.mech.tracking.ContourTracker;
 import pl.edu.pk.mech.tracking.ITracker;
@@ -45,7 +43,7 @@ public class MainWindowController implements Closeable {
     @FXML
     private ImageView thresholdView;
 
-    private volatile VideoTrackingThread playThread;
+    private volatile DemoTrackingThread playThread;
 
     public Map<String, ITracker> trackers;
 
@@ -53,7 +51,6 @@ public class MainWindowController implements Closeable {
 
     @FXML
     public void initialize() {
-        Loader.load(opencv_java.class);
         trackers = Map.of(
                 ContourTracker.class.getSimpleName(),
                 new ContourTracker(),
@@ -68,8 +65,8 @@ public class MainWindowController implements Closeable {
         minRadiusSlider.maxProperty().bind(maxRadiusSlider.valueProperty());
         maxRadiusSlider.minProperty().bind(minRadiusSlider.valueProperty());
 
-        trackerComboBox.getItems().addAll(trackers.keySet());
-        trackerComboBox.getSelectionModel().select(ContourTracker.class.getSimpleName());
+        trackerComboBox.getItems().addAll(trackers.keySet().stream().sorted().toList());
+        trackerComboBox.getSelectionModel().selectFirst();
     }
 
     @Override
@@ -99,7 +96,7 @@ public class MainWindowController implements Closeable {
     public void startCapturing() {
         LOGGER.info("Starting capturing...");
 
-        playThread = new VideoTrackingThread(this, trackers.get(trackerComboBox.getValue()));
+        playThread = new DemoTrackingThread(this, trackers.get(trackerComboBox.getValue()));
         playThread.start();
     }
 

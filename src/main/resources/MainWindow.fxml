@@ -1,13 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-
-<BorderPane fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-            xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckMenuItem?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity"
+            minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/17.0.2-ea"
             fx:controller="pl.edu.pk.mech.controller.MainWindowController">
     <center>
         <SplitPane fx:id="splitPane" dividerPositions="0.5" maxHeight="1.7976931348623157E308"
@@ -59,26 +69,30 @@
                        prefWidth="229.0" text="0"/>
                 <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="17.0" prefWidth="260.0"
                        text="Minimum Radius" textAlignment="CENTER">
-               <padding>
-                  <Insets top="10.0" />
-               </padding>
-            </Label>
-            <Slider fx:id="minRadiusSlider" blockIncrement="0.1" majorTickUnit="1.0" max="20.0" min="0.1" minorTickCount="0" snapToTicks="true" value="1.0">
-               <padding>
-                  <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
-               </padding>
-            </Slider>
-            <Label fx:id="minRadiusValue" alignment="CENTER" contentDisplay="CENTER" prefHeight="17.0" prefWidth="229.0" text="0" />
-            <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="17.0" prefWidth="260.0" text="Maximum Radius" textAlignment="CENTER">
-               <padding>
-                  <Insets top="10.0" />
-               </padding>
-            </Label>
-            <Slider fx:id="maxRadiusSlider" blockIncrement="0.1" majorTickUnit="1.0" max="20.0" min="0.1" minorTickCount="0" snapToTicks="true" value="10.0">
-               <padding>
-                  <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
-               </padding>
-            </Slider>
+                    <padding>
+                        <Insets top="10.0"/>
+                    </padding>
+                </Label>
+                <Slider fx:id="minRadiusSlider" blockIncrement="0.1" majorTickUnit="1.0" max="20.0" min="0.1"
+                        minorTickCount="0" snapToTicks="true" value="1.0">
+                    <padding>
+                        <Insets bottom="5.0" left="10.0" right="10.0" top="5.0"/>
+                    </padding>
+                </Slider>
+                <Label fx:id="minRadiusValue" alignment="CENTER" contentDisplay="CENTER" prefHeight="17.0"
+                       prefWidth="229.0" text="0"/>
+                <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="17.0" prefWidth="260.0"
+                       text="Maximum Radius" textAlignment="CENTER">
+                    <padding>
+                        <Insets top="10.0"/>
+                    </padding>
+                </Label>
+                <Slider fx:id="maxRadiusSlider" blockIncrement="0.1" majorTickUnit="1.0" max="20.0" min="0.1"
+                        minorTickCount="0" snapToTicks="true" value="10.0">
+                    <padding>
+                        <Insets bottom="5.0" left="10.0" right="10.0" top="5.0"/>
+                    </padding>
+                </Slider>
             <Label fx:id="maxRadiusValue" alignment="CENTER" contentDisplay="CENTER" prefHeight="17.0" prefWidth="229.0" text="0" />
                 <Button fx:id="startButton" alignment="CENTER" mnemonicParsing="false" onAction="#buttonOnAction" text="Start">
                     <padding>
@@ -95,24 +109,25 @@
       </VBox>
    </left>
    <top>
-      <MenuBar BorderPane.alignment="CENTER">
-        <menus>
-          <Menu mnemonicParsing="false" text="File">
-            <items>
-              <MenuItem mnemonicParsing="false" text="Close" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Edit">
-            <items>
-              <MenuItem mnemonicParsing="false" text="Delete" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Help">
-            <items>
-              <MenuItem mnemonicParsing="false" text="About" />
-            </items>
-          </Menu>
-        </menus>
-      </MenuBar>
+       <MenuBar BorderPane.alignment="CENTER">
+           <menus>
+               <Menu mnemonicParsing="false" text="Camera">
+                   <items>
+                       <CheckMenuItem mnemonicParsing="false" text="Demo"/>
+                       <SeparatorMenuItem mnemonicParsing="false">
+                           <content>
+                               <Separator prefWidth="200.0"/>
+                           </content>
+                       </SeparatorMenuItem>
+                       <MenuItem mnemonicParsing="false" text="Camera Settings..."/>
+                   </items>
+               </Menu>
+               <Menu mnemonicParsing="false" text="Help">
+                   <items>
+                       <MenuItem mnemonicParsing="false" text="About"/>
+                   </items>
+               </Menu>
+           </menus>
+       </MenuBar>
    </top>
 </BorderPane>

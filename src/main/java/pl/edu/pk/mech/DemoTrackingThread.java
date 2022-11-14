@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.scene.image.Image;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.JavaFXFrameConverter;
 import pl.edu.pk.mech.controller.MainWindowController;
 import pl.edu.pk.mech.tracking.ITracker;
@@ -14,14 +15,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class VideoTrackingThread extends Thread {
+public class DemoTrackingThread extends Thread {
 
-    private static final Logger LOGGER = Logger.getLogger(VideoTrackingThread.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(DemoTrackingThread.class.getName());
     private final MainWindowController controller;
     private final ITracker tracker;
     private volatile boolean isPlaying = false;
 
-    public VideoTrackingThread(final MainWindowController controller, final ITracker tracker) {
+    public DemoTrackingThread(final MainWindowController controller, final ITracker tracker) {
         this.controller = controller;
         this.tracker = tracker;
     }
@@ -30,7 +31,7 @@ public class VideoTrackingThread extends Thread {
     public void run() {
         Platform.runLater(controller::updateInterface);
         do {
-            try (final FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(App.VIDEO_FILE);
+            try (final FrameGrabber grabber = new FFmpegFrameGrabber(App.VIDEO_FILE);
                  final JavaFXFrameConverter converter = new JavaFXFrameConverter()) {
 
                 grabber.start();
