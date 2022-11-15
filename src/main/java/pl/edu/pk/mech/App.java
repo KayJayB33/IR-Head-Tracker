@@ -8,15 +8,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import pl.edu.pk.mech.controller.MainWindowController;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Objects;
 import java.util.logging.Logger;
 
 public class App extends Application {
-
-    public static final File VIDEO_FILE = new File(
-            (Objects.requireNonNull(App.class.getClassLoader().getResource("ExampleVideo.mp4"))).getFile());
 
     private MainWindowController controller;
 
@@ -38,8 +33,6 @@ public class App extends Application {
         primaryStage.setTitle("IR Head Tracker");
         primaryStage.setScene(scene);
         primaryStage.show();
-
-        LOGGER.info(String.format("Video resource: %s", VIDEO_FILE));
     }
 
     @Override

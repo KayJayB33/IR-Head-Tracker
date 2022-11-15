@@ -1,4 +1,4 @@
-package pl.edu.pk.mech;
+package pl.edu.pk.mech.tracking;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -7,8 +7,8 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.JavaFXFrameConverter;
 import pl.edu.pk.mech.controller.MainWindowController;
-import pl.edu.pk.mech.tracking.ITracker;
 
+import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -20,18 +20,20 @@ public class DemoTrackingThread extends Thread {
     private static final Logger LOGGER = Logger.getLogger(DemoTrackingThread.class.getName());
     private final MainWindowController controller;
     private final ITracker tracker;
+    private final File videoFile;
     private volatile boolean isPlaying = false;
 
-    public DemoTrackingThread(final MainWindowController controller, final ITracker tracker) {
+    public DemoTrackingThread(final MainWindowController controller, final ITracker tracker, final File videoFile) {
         this.controller = controller;
         this.tracker = tracker;
+        this.videoFile = videoFile;
     }
 
     @Override
     public void run() {
         Platform.runLater(controller::updateInterface);
         do {
-            try (final FrameGrabber grabber = new FFmpegFrameGrabber(App.VIDEO_FILE);
+            try (final FrameGrabber grabber = new FFmpegFrameGrabber(videoFile);
                  final JavaFXFrameConverter converter = new JavaFXFrameConverter()) {
 
                 grabber.start();

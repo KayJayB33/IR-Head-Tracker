@@ -5,21 +5,31 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.Slider;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
-import pl.edu.pk.mech.DemoTrackingThread;
 import pl.edu.pk.mech.tracking.BlobTracker;
 import pl.edu.pk.mech.tracking.ContourTracker;
+import pl.edu.pk.mech.tracking.DemoTrackingThread;
 import pl.edu.pk.mech.tracking.ITracker;
+import pl.edu.pk.mech.util.PS3Camera;
 
 import java.io.Closeable;
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class MainWindowController implements Closeable {
 
+    private static final File VIDEO_FILE = new File("./res/ExampleVideo.mp4");
     @FXML
     private Button startButton;
     @FXML
@@ -42,22 +52,20 @@ public class MainWindowController implements Closeable {
     private ImageView cameraView;
     @FXML
     private ImageView thresholdView;
-
-    private volatile DemoTrackingThread playThread;
-
-    public Map<String, ITracker> trackers;
+    private final Map<String, ITracker> trackers = Map.of(
+            ContourTracker.class.getSimpleName(),
+            new ContourTracker(),
+            BlobTracker.class.getSimpleName(),
+            new BlobTracker()
+    );
+    @FXML
+    private Menu cameraMenu;
 
     private static final Logger LOGGER = Logger.getLogger(MainWindowController.class.getName());
+    private DemoTrackingThread playThread;
 
     @FXML
     public void initialize() {
-        trackers = Map.of(
-                ContourTracker.class.getSimpleName(),
-                new ContourTracker(),
-                BlobTracker.class.getSimpleName(),
-                new BlobTracker()
-        );
-
         thresholdValue.textProperty().bind(Bindings.format("%.0f", thresholdSlider.valueProperty()));
         minRadiusValue.textProperty().bind(Bindings.format("%.1f px", minRadiusSlider.valueProperty()));
         maxRadiusValue.textProperty().bind(Bindings.format("%.1f px", maxRadiusSlider.valueProperty()));
@@ -67,6 +75,19 @@ public class MainWindowController implements Closeable {
 
         trackerComboBox.getItems().addAll(trackers.keySet().stream().sorted().toList());
         trackerComboBox.getSelectionModel().selectFirst();
+
+        final ToggleGroup toggleGroup = new ToggleGroup();
+        final RadioMenuItem demoRadioMenuItem = new RadioMenuItem("Demo");
+        demoRadioMenuItem.setToggleGroup(toggleGroup);
+        demoRadioMenuItem.setSelected(true);
+
+        List<MenuItem> menuItems = Arrays.stream(PS3Camera.getDevices())
+                .map(RadioMenuItem::new)
+                .peek(item -> item.setToggleGroup(toggleGroup))
+                .collect(Collectors.toList());
+        menuItems.add(demoRadioMenuItem);
+
+        cameraMenu.getItems().addAll(0, menuItems);
     }
 
     @Override
@@ -96,7 +117,7 @@ public class MainWindowController implements Closeable {
     public void startCapturing() {
         LOGGER.info("Starting capturing...");
 
-        playThread = new DemoTrackingThread(this, trackers.get(trackerComboBox.getValue()));
+        playThread = new DemoTrackingThread(this, trackers.get(trackerComboBox.getValue()), VIDEO_FILE);
         playThread.start();
     }
 
