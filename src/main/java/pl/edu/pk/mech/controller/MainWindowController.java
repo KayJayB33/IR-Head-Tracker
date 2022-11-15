@@ -81,7 +81,7 @@ public class MainWindowController implements Closeable {
         demoRadioMenuItem.setToggleGroup(toggleGroup);
         demoRadioMenuItem.setSelected(true);
 
-        List<MenuItem> menuItems = Arrays.stream(PS3Camera.getDevices())
+        List<MenuItem> menuItems = Arrays.stream(PS3Camera.getDevicesNames())
                 .map(RadioMenuItem::new)
                 .peek(item -> item.setToggleGroup(toggleGroup))
                 .collect(Collectors.toList());

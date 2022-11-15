@@ -4,17 +4,20 @@ import com.thomasdiewald.ps3eye.PS3Eye;
 
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class PS3Camera {
+
+    private static final Map<String, PS3Eye> devicesMap = Arrays.stream(PS3Eye.getDevices())
+            .collect(Collectors.toMap(device -> String.format("PS3 Eye USB%d", device.getUSBPortNumber()),
+                    device -> device));
 
     public PS3Camera() {
     }
 
-    public static String[] getDevices() {
-        return Arrays.stream(PS3Eye.getDevices())
-                .map(PS3Eye::getUSBPortNumber)
-                .map(port -> String.format("PS3 Eye USB%d", port))
-                .toArray(String[]::new);
+    public static String[] getDevicesNames() {
+        return devicesMap.keySet().toArray(String[]::new);
     }
 
     static class FrameRate {
