@@ -6,7 +6,7 @@ import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.JavaFXFrameConverter;
-import pl.edu.pk.mech.controller.MainWindowController;
+import pl.edu.pk.mech.gui.controller.MainWindowController;
 
 import java.io.File;
 import java.util.concurrent.ExecutorService;

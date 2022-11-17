@@ -2,6 +2,7 @@ package pl.edu.pk.mech;
 
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.opencv.opencv_java;
+import pl.edu.pk.mech.gui.App;
 
 import static org.bytedeco.ffmpeg.global.avutil.AV_LOG_PANIC;
 import static org.bytedeco.ffmpeg.global.avutil.av_log_set_level;

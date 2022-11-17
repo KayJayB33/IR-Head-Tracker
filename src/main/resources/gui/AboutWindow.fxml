@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<SplitPane dividerPositions="0.2" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+           xmlns="http://javafx.com/javafx/17.0.2-ea">
+    <AnchorPane>
+        <padding>
+            <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
+        </padding>
+        <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="15.0" layoutY="27.0" pickOnBounds="true"
+                   preserveRatio="true" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0"
+                   AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
+            <Image url="@../drawable/pk.jpg"/>
+        </ImageView>
+    </AnchorPane>
+    <AnchorPane minHeight="0.0" minWidth="0.0">
+        <Label layoutX="5.0" layoutY="15.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+               minWidth="-Infinity" prefWidth="520.0"
+               text="Thanks for using IR-Head-Tracker!&#10;This project was created as a subject of my graduation work at Cracow University of Technology at Mechanical Faculty in 2022 under the supervision of Aneta Gądek-Moszczak, PhD Eng.&#10;&#10;Contact me at: krzysztof.betkowski00@gmail.com.&#10;GitHub: https://github.com/Krynger"
+               textAlignment="JUSTIFY" wrapText="true" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="10.0"
+               AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
+            <font>
+                <Font size="18.0"/>
+            </font>
+            <padding>
+                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+            </padding>
+        </Label>
+    </AnchorPane>
+</SplitPane>

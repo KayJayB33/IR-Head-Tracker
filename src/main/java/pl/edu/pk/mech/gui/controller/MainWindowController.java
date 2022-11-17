@@ -1,7 +1,9 @@
-package pl.edu.pk.mech.controller;
+package pl.edu.pk.mech.gui.controller;
 
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -9,10 +11,12 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.Slider;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import pl.edu.pk.mech.tracking.BlobTracker;
 import pl.edu.pk.mech.tracking.ContourTracker;
 import pl.edu.pk.mech.tracking.DemoTrackingThread;
@@ -21,6 +25,7 @@ import pl.edu.pk.mech.util.PS3Camera;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +65,8 @@ public class MainWindowController implements Closeable {
     );
     @FXML
     private Menu cameraMenu;
+    @FXML
+    private MenuItem cameraSettingsMenuItem;
 
     private static final Logger LOGGER = Logger.getLogger(MainWindowController.class.getName());
     private DemoTrackingThread playThread;
@@ -88,6 +95,8 @@ public class MainWindowController implements Closeable {
         menuItems.add(demoRadioMenuItem);
 
         cameraMenu.getItems().addAll(0, menuItems);
+
+        cameraSettingsMenuItem.disableProperty().bind(demoRadioMenuItem.selectedProperty());
     }
 
     @Override
@@ -105,6 +114,20 @@ public class MainWindowController implements Closeable {
         }
 
         startCapturing();
+    }
+
+    @FXML
+    public void aboutOnAction() throws IOException {
+        FXMLLoader loader = new FXMLLoader(this.getClass().getResource("/gui/AboutWindow.fxml"));
+        SplitPane root = loader.load();
+
+        Stage aboutStage = new Stage();
+        Scene aboutScene = new Scene(root);
+
+        aboutStage.setTitle("About");
+        aboutStage.setScene(aboutScene);
+        aboutStage.setResizable(false);
+        aboutStage.show();
     }
 
     public void stopCapturing() {
