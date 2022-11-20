@@ -34,12 +34,10 @@ public class App extends Application {
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
-    }
-
-    @Override
-    public void stop() {
-        LOGGER.info("Closing app...");
-        controller.close();
-        Platform.exit();
+        primaryStage.setOnCloseRequest(e -> {
+            LOGGER.info("Closing app...");
+            controller.close();
+            Platform.exit();
+        });
     }
 }

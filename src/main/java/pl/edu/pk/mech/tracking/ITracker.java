@@ -13,7 +13,7 @@ public interface ITracker {
     Scalar BLUE_COLOR = new Scalar(255, 0, 0);
     Scalar GREEN_COLOR = new Scalar(0, 255, 0);
     Scalar RED_COLOR = new Scalar(0, 0, 255);
-    OpenCVFrameConverter.ToOrgOpenCvCoreMat CONVERTER
+    OpenCVFrameConverter.ToOrgOpenCvCoreMat MAT_FRAME_CONVERTER
             = new OpenCVFrameConverter.ToOrgOpenCvCoreMat();
 
     Frame track(Frame frame, float threshold, float minRadius, float maxRadius);

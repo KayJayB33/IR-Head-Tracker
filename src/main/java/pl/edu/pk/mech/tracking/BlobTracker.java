@@ -46,7 +46,7 @@ public class BlobTracker implements ITracker {
         }
 
         // Converting Frame to Matrix
-        final Mat src = CONVERTER.convert(frame);
+        final Mat src = MAT_FRAME_CONVERTER.convert(frame);
 
         // Converting source image to grayscale
         final Mat gray = new Mat(src.rows(), src.cols(), src.type());
@@ -93,7 +93,7 @@ public class BlobTracker implements ITracker {
         bitwise_not(binary, binary);
         cvtColor(binary, binary, COLOR_GRAY2BGR);
         drawKeypoints(binary, keypoints, binary, RED_COLOR, DRAW_RICH_KEYPOINTS);
-        return CONVERTER.convert(binary);
+        return MAT_FRAME_CONVERTER.convert(binary);
     }
 
     @Override

@@ -34,7 +34,7 @@ public class ContourTracker implements ITracker {
         points.clear();
 
         // Converting Frame to Matrix
-        final Mat src = CONVERTER.convert(frame);
+        final Mat src = MAT_FRAME_CONVERTER.convert(frame);
 
         // Converting the source image to grayscale and thresholding
         final Mat gray = new Mat(src.rows(), src.cols(), src.type());
@@ -84,7 +84,7 @@ public class ContourTracker implements ITracker {
         // Converting image to 3 channels for JavaFX
         cvtColor(binary, binary, COLOR_GRAY2BGR);
         drawContours(binary, contours, -1, RED_COLOR, 2);
-        return CONVERTER.convert(binary);
+        return MAT_FRAME_CONVERTER.convert(binary);
     }
 
     @Override
