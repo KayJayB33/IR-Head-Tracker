@@ -15,23 +15,20 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DemoTrackingThread extends Thread {
+public class DemoTrackingThread extends TrackingThread {
 
     private static final Logger LOGGER = Logger.getLogger(DemoTrackingThread.class.getName());
-    private final MainWindowController controller;
-    private final ITracker tracker;
     private final File videoFile;
-    private volatile boolean isPlaying = false;
 
     public DemoTrackingThread(final MainWindowController controller, final ITracker tracker, final File videoFile) {
-        this.controller = controller;
-        this.tracker = tracker;
+        super(controller, tracker);
         this.videoFile = videoFile;
     }
 
     @Override
     public void run() {
         Platform.runLater(controller::updateInterface);
+        // Playing video in a loop
         do {
             try (final FrameGrabber grabber = new FFmpegFrameGrabber(videoFile);
                  final JavaFXFrameConverter converter = new JavaFXFrameConverter()) {
@@ -72,8 +69,6 @@ public class DemoTrackingThread extends Thread {
                         final Image image = converter.convert(imageFrame);
                         final Image thresholdImage = converter.convert(binaryFrame);
 
-                        Platform.runLater(() -> controller.updateDetectedAmount(tracker.getDetectedAmount()));
-
                         imageExecutor.submit(() -> {
                             final long timeStampDeltaMicros = imageFrame.timestamp - playbackTimer.elapsedMicros();
 
@@ -89,7 +84,10 @@ public class DemoTrackingThread extends Thread {
                                 }
                             }
 
-                            Platform.runLater(() -> controller.updateViews(image, thresholdImage));
+                            Platform.runLater(() -> {
+                                controller.updateViews(image, thresholdImage);
+                                controller.updateDetectedAmount(tracker.getDetectedAmount());
+                            });
                         });
                     }
 
@@ -112,7 +110,7 @@ public class DemoTrackingThread extends Thread {
                 imageExecutor.awaitTermination(5, TimeUnit.SECONDS);
 
             } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, String.format("Exception occured: %s", e.getMessage()), e);
+                LOGGER.log(Level.SEVERE, String.format("Exception occurred: %s", e.getMessage()), e);
                 stopCapturing();
             }
             LOGGER.info("Capturing ended...");
@@ -121,16 +119,6 @@ public class DemoTrackingThread extends Thread {
                 LOGGER.info("Playing in a loop...");
             }
         } while (isPlaying);
-    }
-
-    public void stopCapturing() {
-        LOGGER.info("Stopping thread...");
-        Platform.runLater(controller::updateInterface);
-        isPlaying = false;
-    }
-
-    public boolean isPlaying() {
-        return isPlaying;
     }
 
     private static class PlaybackTimer {

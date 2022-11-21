@@ -18,9 +18,11 @@ import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import pl.edu.pk.mech.tracking.BlobTracker;
+import pl.edu.pk.mech.tracking.CameraTrackingThread;
 import pl.edu.pk.mech.tracking.ContourTracker;
 import pl.edu.pk.mech.tracking.DemoTrackingThread;
 import pl.edu.pk.mech.tracking.ITracker;
+import pl.edu.pk.mech.tracking.TrackingThread;
 import pl.edu.pk.mech.util.PS3Camera;
 
 import java.io.Closeable;
@@ -65,11 +67,12 @@ public class MainWindowController implements Closeable {
     );
     @FXML
     private Menu cameraMenu;
+    private List<RadioMenuItem> devicesInCameraMenu;
     @FXML
     private MenuItem cameraSettingsMenuItem;
 
     private static final Logger LOGGER = Logger.getLogger(MainWindowController.class.getName());
-    private DemoTrackingThread playThread;
+    private TrackingThread playThread;
 
     @FXML
     public void initialize() {
@@ -88,13 +91,13 @@ public class MainWindowController implements Closeable {
         demoRadioMenuItem.setToggleGroup(toggleGroup);
         demoRadioMenuItem.setSelected(true);
 
-        List<MenuItem> menuItems = Arrays.stream(PS3Camera.getDevicesNames())
+        devicesInCameraMenu = Arrays.stream(PS3Camera.getDevicesNames())
                 .map(RadioMenuItem::new)
                 .peek(item -> item.setToggleGroup(toggleGroup))
                 .collect(Collectors.toList());
-        menuItems.add(demoRadioMenuItem);
+        devicesInCameraMenu.add(demoRadioMenuItem);
 
-        cameraMenu.getItems().addAll(0, menuItems);
+        cameraMenu.getItems().addAll(0, devicesInCameraMenu);
 
         cameraSettingsMenuItem.disableProperty().bind(demoRadioMenuItem.selectedProperty());
     }
@@ -104,6 +107,8 @@ public class MainWindowController implements Closeable {
         if (playThread != null) {
             playThread.stopCapturing();
         }
+
+        PS3Camera.disposeAll();
     }
 
     @FXML
@@ -139,8 +144,16 @@ public class MainWindowController implements Closeable {
 
     public void startCapturing() {
         LOGGER.info("Starting capturing...");
+        RadioMenuItem selectedItem = devicesInCameraMenu.stream()
+                .filter(RadioMenuItem::isSelected)
+                .findAny()
+                .orElseThrow();
 
-        playThread = new DemoTrackingThread(this, trackers.get(trackerComboBox.getValue()), VIDEO_FILE);
+        if (selectedItem.getText().equals("Demo")) {
+            playThread = new DemoTrackingThread(this, trackers.get(trackerComboBox.getValue()), VIDEO_FILE);
+        } else {
+            playThread = new CameraTrackingThread(this, trackers.get(trackerComboBox.getValue()), selectedItem.getText());
+        }
         playThread.start();
     }
 

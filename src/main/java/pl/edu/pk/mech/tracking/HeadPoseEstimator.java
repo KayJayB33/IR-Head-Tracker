@@ -33,7 +33,7 @@ public class HeadPoseEstimator {
     private static final Logger LOGGER = Logger.getLogger(HeadPoseEstimator.class.getName());
 
     static {
-        // dummy point in tringle centroid
+        // dummy point in triangle centroid
         final Point3 dummyPoint = new Point3(-165.f / 3, 0.f / 3, 145.f / 3);
 
         model = new MatOfPoint3f(

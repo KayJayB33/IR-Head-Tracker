@@ -71,7 +71,7 @@ public class ContourTracker implements ITracker {
         for (int i = 0; i < points.size(); i++) {
             final Point point = points.get(i);
             final float radius = (float) Math.sqrt(contourArea(contours.get(i)) / Math.PI);
-            ITracker.drawCross(src, point.x, point.y);
+            ITracker.drawCircle(src, point.x, point.y, radius);
             putText(src,
                     String.format("#%d %.1fpx", i + 1, radius),
                     new Point(point.x - 40, point.y - 40),

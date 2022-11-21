@@ -32,8 +32,9 @@ public class BlobTracker implements ITracker {
 
     static {
         params.set_filterByArea(true);
-        params.set_maxThreshold(256); // maxThreshold is exclusive value
+        params.set_maxThreshold(255); // maxThreshold is exclusive value
         params.set_filterByColor(true);
+        params.set_minRepeatability(2);
     }
 
     private SimpleBlobDetector detector = SimpleBlobDetector.create(params);
@@ -79,7 +80,7 @@ public class BlobTracker implements ITracker {
             final KeyPoint keypoint = keypointsList.get(i);
             final Point point = keypoint.pt;
             final float radius = keypoint.size / 2;
-            ITracker.drawCross(src, point.x, point.y);
+            ITracker.drawCircle(src, point.x, point.y, radius);
             putText(src,
                     String.format("#%d %.1fpx", i + 1, radius),
                     new Point(point.x - 40, point.y - 40),
