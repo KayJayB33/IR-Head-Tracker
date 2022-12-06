@@ -87,7 +87,7 @@
                        <Separator prefWidth="200.0" />
                    </content>
                </SeparatorMenuItem>
-               <MenuItem fx:id="cameraSettingsMenuItem" mnemonicParsing="false" text="Camera Settings..." />
+               <MenuItem mnemonicParsing="false" onAction="#settingsOnAction" text="Settings..." />
            </Menu>
            <Menu mnemonicParsing="false" text="Help">
                <MenuItem mnemonicParsing="false" onAction="#aboutOnAction" text="About" />

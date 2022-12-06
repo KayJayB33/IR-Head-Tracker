@@ -8,10 +8,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -68,8 +68,6 @@ public class MainWindowController implements Closeable {
     @FXML
     private Menu cameraMenu;
     private List<RadioMenuItem> devicesInCameraMenu;
-    @FXML
-    private MenuItem cameraSettingsMenuItem;
 
     private static final Logger LOGGER = Logger.getLogger(MainWindowController.class.getName());
     private TrackingThread playThread;
@@ -98,8 +96,6 @@ public class MainWindowController implements Closeable {
         devicesInCameraMenu.add(demoRadioMenuItem);
 
         cameraMenu.getItems().addAll(0, devicesInCameraMenu);
-
-        cameraSettingsMenuItem.disableProperty().bind(demoRadioMenuItem.selectedProperty());
     }
 
     @Override
@@ -119,6 +115,26 @@ public class MainWindowController implements Closeable {
         }
 
         startCapturing();
+    }
+
+    @FXML
+    public void settingsOnAction() throws IOException {
+        FXMLLoader loader = new FXMLLoader(this.getClass().getResource("/gui/SettingsWindow.fxml"));
+        TabPane root = loader.load();
+        SettingsWindowController controller = loader.getController();
+
+        Stage settingsStage = new Stage();
+        Scene settingsScene = new Scene(root);
+
+        settingsStage.setTitle("Settings");
+        settingsStage.setScene(settingsScene);
+        settingsStage.setResizable(false);
+
+        controller.cameraSettingsTab.disableProperty()
+                .bind(devicesInCameraMenu.get(devicesInCameraMenu.size() - 1)
+                        .selectedProperty());
+
+        settingsStage.show();
     }
 
     @FXML
