@@ -11,10 +11,10 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.SplitPane;
-import javafx.scene.control.TabPane;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import pl.edu.pk.mech.tracking.BlobTracker;
@@ -37,6 +37,13 @@ import java.util.stream.Collectors;
 public class MainWindowController implements Closeable {
 
     private static final File VIDEO_FILE = new File("./res/ExampleVideo.mp4");
+    private static final Logger LOGGER = Logger.getLogger(MainWindowController.class.getName());
+    private final Map<String, ITracker> trackers = Map.of(
+            ContourTracker.class.getSimpleName(),
+            new ContourTracker(),
+            BlobTracker.class.getSimpleName(),
+            new BlobTracker()
+    );
     @FXML
     private Button startButton;
     @FXML
@@ -59,17 +66,10 @@ public class MainWindowController implements Closeable {
     private ImageView cameraView;
     @FXML
     private ImageView thresholdView;
-    private final Map<String, ITracker> trackers = Map.of(
-            ContourTracker.class.getSimpleName(),
-            new ContourTracker(),
-            BlobTracker.class.getSimpleName(),
-            new BlobTracker()
-    );
     @FXML
     private Menu cameraMenu;
     private List<RadioMenuItem> devicesInCameraMenu;
-
-    private static final Logger LOGGER = Logger.getLogger(MainWindowController.class.getName());
+    private RadioMenuItem demoRadioMenuItem;
     private TrackingThread playThread;
 
     @FXML
@@ -85,7 +85,7 @@ public class MainWindowController implements Closeable {
         trackerComboBox.getSelectionModel().selectFirst();
 
         final ToggleGroup toggleGroup = new ToggleGroup();
-        final RadioMenuItem demoRadioMenuItem = new RadioMenuItem("Demo");
+        demoRadioMenuItem = new RadioMenuItem("Demo");
         demoRadioMenuItem.setToggleGroup(toggleGroup);
         demoRadioMenuItem.setSelected(true);
 
@@ -120,7 +120,7 @@ public class MainWindowController implements Closeable {
     @FXML
     public void settingsOnAction() throws IOException {
         FXMLLoader loader = new FXMLLoader(this.getClass().getResource("/gui/SettingsWindow.fxml"));
-        TabPane root = loader.load();
+        VBox root = loader.load();
         SettingsWindowController controller = loader.getController();
 
         Stage settingsStage = new Stage();
@@ -130,9 +130,8 @@ public class MainWindowController implements Closeable {
         settingsStage.setScene(settingsScene);
         settingsStage.setResizable(false);
 
-        controller.cameraSettingsTab.disableProperty()
-                .bind(devicesInCameraMenu.get(devicesInCameraMenu.size() - 1)
-                        .selectedProperty());
+        controller.cameraSettingsTab.disableProperty().bind(demoRadioMenuItem.selectedProperty());
+        controller.setStage(settingsStage);
 
         settingsStage.show();
     }
@@ -165,7 +164,7 @@ public class MainWindowController implements Closeable {
                 .findAny()
                 .orElseThrow();
 
-        if (selectedItem.getText().equals("Demo")) {
+        if (selectedItem.equals(demoRadioMenuItem)) {
             playThread = new DemoTrackingThread(this, trackers.get(trackerComboBox.getValue()), VIDEO_FILE);
         } else {
             playThread = new CameraTrackingThread(this, trackers.get(trackerComboBox.getValue()), selectedItem.getText());
@@ -187,7 +186,7 @@ public class MainWindowController implements Closeable {
     public void updateDetectedAmount(int amount) {
         final String text = String.format("Detected objects: %d", amount);
 
-        if(amount != 3) {
+        if (amount != 3) {
             detectedAmountLabel.setTextFill(Color.RED);
         } else {
             detectedAmountLabel.setTextFill(Color.BLACK);
@@ -196,23 +195,19 @@ public class MainWindowController implements Closeable {
         detectedAmountLabel.setText(text);
     }
 
-    public double getThresholdValue()
-    {
+    public double getThresholdValue() {
         return thresholdSlider.getValue();
     }
 
-    public double getMinRadiusValue()
-    {
+    public double getMinRadiusValue() {
         return minRadiusSlider.getValue();
     }
 
-    public double getMaxRadiusValue()
-    {
+    public double getMaxRadiusValue() {
         return maxRadiusSlider.getValue();
     }
 
-    public void updateViews(final Image ...images)
-    {
+    public void updateViews(final Image... images) {
         cameraView.setImage(images[0]);
         thresholdView.setImage(images[1]);
     }

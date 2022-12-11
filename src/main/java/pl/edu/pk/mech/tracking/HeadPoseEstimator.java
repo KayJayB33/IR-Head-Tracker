@@ -9,6 +9,7 @@ import org.opencv.core.MatOfPoint3f;
 import org.opencv.core.Point;
 import org.opencv.core.Point3;
 import org.opencv.core.Size;
+import pl.edu.pk.mech.model.Model;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,7 +24,7 @@ import static org.opencv.imgproc.Imgproc.line;
 public class HeadPoseEstimator {
 
     private static final float FOV = 56f;
-    private static final MatOfPoint3f model;
+    private static final MatOfPoint3f model = new MatOfPoint3f(Model.getInstance().getPoints());
     private static final MatOfPoint3f axis = new MatOfPoint3f(
             new Point3(0, 0, 0),
             new Point3(50, 0, 0),
@@ -31,17 +32,6 @@ public class HeadPoseEstimator {
             new Point3(0, 0, 50));
     private static final Mat[] lastSolution = new Mat[2];
     private static final Logger LOGGER = Logger.getLogger(HeadPoseEstimator.class.getName());
-
-    static {
-        // dummy point in triangle centroid
-        final Point3 dummyPoint = new Point3(-165.f / 3, 0.f / 3, 145.f / 3);
-
-        model = new MatOfPoint3f(
-                new Point3(-165.f, 0.f, 145.f), // TOP #1
-                new Point3(0.f, -80.f, 0.f), // LEFT #2
-                new Point3(0.f, 80.f, 0.f), // RIGHT #3
-                dummyPoint);
-    }
 
     public static void estimate(final Mat src, final List<Point> points) {
         assert points.size() == 3;
