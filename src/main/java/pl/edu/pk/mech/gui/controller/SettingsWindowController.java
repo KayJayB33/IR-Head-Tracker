@@ -1,23 +1,51 @@
 package pl.edu.pk.mech.gui.controller;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.Tab;
+import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import pl.edu.pk.mech.model.Model;
 
 public class SettingsWindowController {
+    private static final Model model = Model.getInstance();
     @FXML
     public Tab cameraSettingsTab;
-    private static final Model model = Model.getInstance();
     @FXML
     public Spinner<Double> widthSpinner;
     @FXML
     public Spinner<Double> heightSpinner;
     @FXML
     public Spinner<Double> depthSpinner;
+    @FXML
+    public Slider gainSlider;
+    @FXML
+    public Slider exposureSlider;
+    @FXML
+    public Slider sharpnessSlider;
+    @FXML
+    public Slider hueSlider;
+    @FXML
+    public Slider brightnessSlider;
+    @FXML
+    public Slider contrastSlider;
+    @FXML
+    public Slider redSlider;
+    @FXML
+    public Slider greenSlider;
+    @FXML
+    public Slider blueSlider;
+    @FXML
+    public CheckBox autogainCheckBox;
+    @FXML
+    public CheckBox autoWhiteCheckBox;
+    @FXML
+    public CheckBox flipHCheckBox;
+    @FXML
+    public CheckBox flipVCheckBox;
+    @FXML
+    public ImageView cameraPreview;
+
     private Stage stage;
 
 
