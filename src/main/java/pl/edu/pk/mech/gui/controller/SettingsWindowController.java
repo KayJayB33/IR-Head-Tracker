@@ -58,6 +58,7 @@ public class SettingsWindowController {
 
     public void setStage(final Stage stage) {
         this.stage = stage;
+        stage.setOnCloseRequest(event -> cancelOnAction());
     }
 
     public void setCamera(final PS3Camera camera) {
@@ -77,6 +78,8 @@ public class SettingsWindowController {
         autoWhiteCheckBox.setSelected(initialSettings.autoWhiteBalance);
         flipHCheckBox.setSelected(initialSettings.flipH);
         flipVCheckBox.setSelected(initialSettings.flipV);
+
+        videoModeComboBox.getSelectionModel().select(camera.getVideoMode());
     }
 
     @FXML
@@ -146,7 +149,8 @@ public class SettingsWindowController {
         fovComboBox.getSelectionModel().selectFirst();
 
         videoModeComboBox.getItems().addAll(PS3Camera.VideoMode.class.getEnumConstants());
-        videoModeComboBox.getSelectionModel().select(PS3Camera.VideoMode.VGA_75);
+        videoModeComboBox.valueProperty()
+                .addListener((o, old, value) -> camera.setVideoMode(value));
     }
 
     @FXML
@@ -182,6 +186,7 @@ public class SettingsWindowController {
         boolean autoWhiteBalance;
         boolean flipH;
         boolean flipV;
+        PS3Camera.VideoMode videoMode;
 
         CameraSettings(final PS3Camera camera) {
             gain = camera.getGain();
@@ -197,6 +202,7 @@ public class SettingsWindowController {
             autoWhiteBalance = camera.getAutoWhiteBalance();
             flipH = camera.getHorizontalFlip();
             flipV = camera.getVerticalFlip();
+            videoMode = camera.getVideoMode();
         }
 
         void restoreCameraSettings(final PS3Camera camera) {
@@ -213,6 +219,7 @@ public class SettingsWindowController {
             camera.setAutoWhiteBalance(autoWhiteBalance);
             camera.setFlipH(flipH);
             camera.setFlipV(flipV);
+            camera.setVideoMode(videoMode);
         }
     }
 }
