@@ -4,25 +4,13 @@ import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.RadioMenuItem;
-import javafx.scene.control.Slider;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import pl.edu.pk.mech.tracking.BlobTracker;
-import pl.edu.pk.mech.tracking.CameraTrackingThread;
-import pl.edu.pk.mech.tracking.ContourTracker;
-import pl.edu.pk.mech.tracking.DemoTrackingThread;
-import pl.edu.pk.mech.tracking.ITracker;
-import pl.edu.pk.mech.tracking.TrackingThread;
+import pl.edu.pk.mech.tracking.*;
 import pl.edu.pk.mech.util.PS3Camera;
 
 import java.io.Closeable;
@@ -119,12 +107,12 @@ public class MainWindowController implements Closeable {
 
     @FXML
     public void settingsOnAction() throws IOException {
-        FXMLLoader loader = new FXMLLoader(this.getClass().getResource("/gui/SettingsWindow.fxml"));
-        VBox root = loader.load();
-        SettingsWindowController controller = loader.getController();
+        final FXMLLoader loader = new FXMLLoader(this.getClass().getResource("/gui/SettingsWindow.fxml"));
+        final VBox root = loader.load();
+        final SettingsWindowController controller = loader.getController();
 
-        Stage settingsStage = new Stage();
-        Scene settingsScene = new Scene(root);
+        final Stage settingsStage = new Stage();
+        final Scene settingsScene = new Scene(root);
 
         settingsStage.setTitle("Settings");
         settingsStage.setScene(settingsScene);
@@ -132,6 +120,15 @@ public class MainWindowController implements Closeable {
 
         controller.cameraSettingsTab.disableProperty().bind(demoRadioMenuItem.selectedProperty());
         controller.setStage(settingsStage);
+
+        final RadioMenuItem selectedItem = devicesInCameraMenu.stream()
+                .filter(RadioMenuItem::isSelected)
+                .findAny()
+                .orElseThrow();
+
+        if (!selectedItem.getText().equals("Demo")) {
+            controller.setCamera(new PS3Camera(selectedItem.getText()));
+        }
 
         settingsStage.show();
     }

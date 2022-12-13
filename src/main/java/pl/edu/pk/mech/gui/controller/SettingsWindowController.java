@@ -6,6 +6,7 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import pl.edu.pk.mech.model.Model;
+import pl.edu.pk.mech.util.PS3Camera;
 
 public class SettingsWindowController {
     private static final Model model = Model.getInstance();
@@ -45,24 +46,49 @@ public class SettingsWindowController {
     public CheckBox flipVCheckBox;
     @FXML
     public ImageView cameraPreview;
+    @FXML
+    public ComboBox<PS3Camera.FOV> fovComboBox;
+    @FXML
+    public ComboBox<PS3Camera.VideoMode> videoModeComboBox;
 
     private Stage stage;
+    private PS3Camera camera;
+    private CameraSettings initialSettings;
 
 
     public void setStage(final Stage stage) {
         this.stage = stage;
     }
 
+    public void setCamera(final PS3Camera camera) {
+        this.camera = camera;
+
+        initialSettings = new CameraSettings(camera);
+        gainSlider.setValue(initialSettings.gain);
+        exposureSlider.setValue(initialSettings.exposure);
+        sharpnessSlider.setValue(initialSettings.sharpness);
+        hueSlider.setValue(initialSettings.hue);
+        brightnessSlider.setValue(initialSettings.brightness);
+        contrastSlider.setValue(initialSettings.contrast);
+        redSlider.setValue(initialSettings.redBalance);
+        greenSlider.setValue(initialSettings.greenBalance);
+        blueSlider.setValue(initialSettings.blueBalance);
+        autogainCheckBox.setSelected(initialSettings.autoGain);
+        autoWhiteCheckBox.setSelected(initialSettings.autoWhiteBalance);
+        flipHCheckBox.setSelected(initialSettings.flipH);
+        flipVCheckBox.setSelected(initialSettings.flipV);
+    }
+
     @FXML
     public void initialize() {
         StringConverter<Double> doubleStringConverter = new StringConverter<>() {
             @Override
-            public String toString(Double value) {
+            public String toString(final Double value) {
                 return value.toString() + " mm";
             }
 
             @Override
-            public Double fromString(String string) {
+            public Double fromString(final String string) {
                 String valueWithoutUnits = string.replaceAll("mm", "").trim();
                 if (valueWithoutUnits.isEmpty()) {
                     return 0.;
@@ -86,10 +112,46 @@ public class SettingsWindowController {
         widthSpinner.setValueFactory(widthValueFactory);
         heightSpinner.setValueFactory(heightValueFactory);
         depthSpinner.setValueFactory(depthValueFactory);
+
+        gainSlider.valueProperty()
+                .addListener((o, old, value) -> camera.setGain(value.intValue()));
+        exposureSlider.valueProperty()
+                .addListener((o, old, value) -> camera.setExposure(value.intValue()));
+        sharpnessSlider.valueProperty()
+                .addListener((o, old, value) -> camera.setSharpness(value.intValue()));
+        hueSlider.valueProperty()
+                .addListener((o, old, value) -> camera.setHue(value.intValue()));
+        brightnessSlider.valueProperty()
+                .addListener((o, old, value) -> camera.setBrightness(value.intValue()));
+        contrastSlider.valueProperty()
+                .addListener((o, old, value) -> camera.setContrast(value.intValue()));
+        redSlider.valueProperty()
+                .addListener((o, old, value) -> camera.setRedBalance(value.intValue()));
+        greenSlider.valueProperty()
+                .addListener((o, old, value) -> camera.setGreenBalance(value.intValue()));
+        blueSlider.valueProperty()
+                .addListener((o, old, value) -> camera.setBlueBalance(value.intValue()));
+        autogainCheckBox.selectedProperty()
+                .addListener(((o, old, value) -> camera.setAutogain(value)));
+        autoWhiteCheckBox.selectedProperty()
+                .addListener(((o, old, value) -> camera.setAutoWhiteBalance(value)));
+        flipHCheckBox.selectedProperty()
+                .addListener(((o, old, value) -> camera.setFlipH(value)));
+        flipVCheckBox.selectedProperty()
+                .addListener(((o, old, value) -> camera.setFlipV(value)));
+
+
+        fovComboBox.getItems().add(PS3Camera.FOV.RED_DOT);
+        fovComboBox.getItems().add(PS3Camera.FOV.BLUE_DOT);
+        fovComboBox.getSelectionModel().selectFirst();
+
+        videoModeComboBox.getItems().addAll(PS3Camera.VideoMode.class.getEnumConstants());
+        videoModeComboBox.getSelectionModel().select(PS3Camera.VideoMode.VGA_75);
     }
 
     @FXML
     public void cancelOnAction() {
+        initialSettings.restoreCameraSettings(camera);
         stage.close();
     }
 
@@ -103,4 +165,54 @@ public class SettingsWindowController {
         stage.close();
     }
 
+    /**
+     * Helper class to save initial camera settings.
+     */
+    static class CameraSettings {
+        int gain;
+        int exposure;
+        int sharpness;
+        int hue;
+        int brightness;
+        int contrast;
+        int redBalance;
+        int greenBalance;
+        int blueBalance;
+        boolean autoGain;
+        boolean autoWhiteBalance;
+        boolean flipH;
+        boolean flipV;
+
+        CameraSettings(final PS3Camera camera) {
+            gain = camera.getGain();
+            exposure = camera.getExposure();
+            sharpness = camera.getSharpness();
+            hue = camera.getHue();
+            brightness = camera.getBrightness();
+            contrast = camera.getContrast();
+            redBalance = camera.getRedBalance();
+            greenBalance = camera.getGreenBalance();
+            blueBalance = camera.getBlueBalance();
+            autoGain = camera.getAutogain();
+            autoWhiteBalance = camera.getAutoWhiteBalance();
+            flipH = camera.getHorizontalFlip();
+            flipV = camera.getVerticalFlip();
+        }
+
+        void restoreCameraSettings(final PS3Camera camera) {
+            camera.setGain(gain);
+            camera.setExposure(exposure);
+            camera.setSharpness(sharpness);
+            camera.setHue(hue);
+            camera.setBrightness(brightness);
+            camera.setContrast(contrast);
+            camera.setRedBalance(redBalance);
+            camera.setGreenBalance(greenBalance);
+            camera.setBlueBalance(blueBalance);
+            camera.setAutogain(autoGain);
+            camera.setAutoWhiteBalance(autoWhiteBalance);
+            camera.setFlipH(flipH);
+            camera.setFlipV(flipV);
+        }
+    }
 }

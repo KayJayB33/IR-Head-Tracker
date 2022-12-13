@@ -18,6 +18,13 @@ import static pl.edu.pk.mech.tracking.ITracker.MAT_FRAME_CONVERTER;
  * Helper class for PS3Eye.
  */
 public class PS3Camera {
+    public void setFlipH(final boolean flip) {
+        ps3eye.setFlip(flip, getVerticalFlip());
+    }
+
+    public void setFlipV(final boolean flip) {
+        ps3eye.setFlip(getHorizontalFlip(), flip);
+    }
 
     private static final Map<String, PS3Eye> devicesMap = Arrays.stream(PS3Eye.getDevices())
             .collect(Collectors.toMap(device -> String.format("PS3 Eye USB%d", device.getUSBPortNumber()),
@@ -135,12 +142,62 @@ public class PS3Camera {
         return ps3eye.getAutoWhiteBalance();
     }
 
-    public void setFlip(final boolean horizontalFlip, final boolean verticalFlip) {
-        ps3eye.setFlip(horizontalFlip, verticalFlip);
+    public enum FOV {
+        RED_DOT(56),
+        BLUE_DOT(75);
+
+        private final int fov;
+
+        FOV(int fov) {
+            this.fov = fov;
+        }
+
+        public int getValue() {
+            return fov;
+        }
+
+        @Override
+        public String toString() {
+            final String format = "%d\u00B0 (%s)";
+            return switch (this) {
+                case RED_DOT -> format.formatted(fov, "red dot");
+                case BLUE_DOT -> format.formatted(fov, "blue dot");
+            };
+        }
     }
 
     public boolean getHorizontalFlip() {
         return ps3eye.getFlipH();
+    }
+
+    public enum VideoMode {
+        VGA_30(PS3Eye.Resolution.VGA, 30),
+        VGA_60(PS3Eye.Resolution.VGA, 60),
+        VGA_75(PS3Eye.Resolution.VGA, 75),
+        QVGA_30(PS3Eye.Resolution.QVGA, 30),
+        QVGA_60(PS3Eye.Resolution.QVGA, 60),
+        QVGA_187(PS3Eye.Resolution.QVGA, 187);
+
+        private final PS3Eye.Resolution colorMode;
+        private final int framerate;
+
+        VideoMode(final PS3Eye.Resolution colorMode, final int framerate) {
+            this.colorMode = colorMode;
+            this.framerate = framerate;
+        }
+
+        public int getFramerate() {
+            return framerate;
+        }
+
+        public PS3Eye.Resolution getColorMode() {
+            return colorMode;
+        }
+
+        @Override
+        public String toString() {
+            return "%s %d fps".formatted(this.colorMode, this.framerate);
+        }
     }
 
     public boolean getVerticalFlip() {
