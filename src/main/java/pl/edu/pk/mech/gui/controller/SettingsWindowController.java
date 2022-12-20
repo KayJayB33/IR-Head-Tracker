@@ -6,6 +6,7 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import pl.edu.pk.mech.model.Model;
+import pl.edu.pk.mech.util.CameraPreviewThread;
 import pl.edu.pk.mech.util.PS3Camera;
 
 public class SettingsWindowController {
@@ -54,6 +55,7 @@ public class SettingsWindowController {
     private Stage stage;
     private PS3Camera camera;
     private CameraSettings initialSettings;
+    private CameraPreviewThread previewThread;
 
 
     public void setStage(final Stage stage) {
@@ -63,6 +65,7 @@ public class SettingsWindowController {
 
     public void setCamera(final PS3Camera camera) {
         this.camera = camera;
+        this.previewThread = new CameraPreviewThread(camera, cameraPreview);
 
         initialSettings = new CameraSettings(camera);
         gainSlider.setValue(initialSettings.gain);
@@ -153,12 +156,21 @@ public class SettingsWindowController {
         videoModeComboBox.getItems().addAll(PS3Camera.VideoMode.class.getEnumConstants());
         videoModeComboBox.valueProperty()
                 .addListener((o, old, value) -> camera.setVideoMode(value));
+
+        cameraSettingsTab.selectedProperty().addListener((o, old, value) -> {
+            if (value) {
+                previewThread.start();
+                return;
+            }
+            previewThread.stopCapturing();
+        });
     }
 
     @FXML
     public void cancelOnAction() {
         if (initialSettings != null) {
             initialSettings.restoreCameraSettings(camera);
+            previewThread.stopCapturing();
         }
         stage.close();
     }
@@ -170,6 +182,11 @@ public class SettingsWindowController {
         final double depth = depthSpinner.getValue();
 
         model.setModelDims(width, height, depth);
+
+        if (initialSettings != null) {
+            previewThread.stopCapturing();
+        }
+
         stage.close();
     }
 

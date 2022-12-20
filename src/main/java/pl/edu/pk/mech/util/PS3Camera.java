@@ -30,7 +30,7 @@ public class PS3Camera {
         }
     }
 
-    private final PS3Eye ps3eye;
+    final PS3Eye ps3eye;
     private PS3Camera.FrameRate framerate;
     private int frameWidth;
     private int frameHeight;
