@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.13'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 group 'pl.edu.pk.mech'
@@ -28,11 +29,21 @@ application {
     mainClass = 'pl.edu.pk.mech.Launcher'
 }
 
+java {
+    modularity.inferModulePath.set(false)
+}
+
 javafx {
     version = '17.0.2'
-    modules = [ 'javafx.controls', 'javafx.fxml' ]
+    modules = ['javafx.controls', 'javafx.fxml']
 }
 
 test {
     useJUnitPlatform()
+}
+
+tasks {
+    shadowJar {
+        exclude('module-info.class')
+    }
 }

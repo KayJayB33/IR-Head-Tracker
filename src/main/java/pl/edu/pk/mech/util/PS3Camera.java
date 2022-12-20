@@ -35,10 +35,11 @@ public class PS3Camera {
     private int frameWidth;
     private int frameHeight;
     private byte[] pixels;
-
+    private FOV fov;
 
     public PS3Camera(final String name) {
         ps3eye = devicesMap.get(name);
+        fov = FOV.RED_DOT;
     }
 
     public static void disposeAll() {
@@ -47,6 +48,14 @@ public class PS3Camera {
 
     public static String[] getDevicesNames() {
         return devicesMap.keySet().toArray(String[]::new);
+    }
+
+    public FOV getFov() {
+        return fov;
+    }
+
+    public void setFov(final FOV fov) {
+        this.fov = fov;
     }
 
     public void setFlipH(final boolean flip) {

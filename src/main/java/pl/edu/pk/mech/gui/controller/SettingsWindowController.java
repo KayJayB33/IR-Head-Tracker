@@ -79,6 +79,7 @@ public class SettingsWindowController {
         flipHCheckBox.setSelected(initialSettings.flipH);
         flipVCheckBox.setSelected(initialSettings.flipV);
 
+        fovComboBox.getSelectionModel().select(camera.getFov());
         videoModeComboBox.getSelectionModel().select(camera.getVideoMode());
     }
 
@@ -146,7 +147,8 @@ public class SettingsWindowController {
 
         fovComboBox.getItems().add(PS3Camera.FOV.RED_DOT);
         fovComboBox.getItems().add(PS3Camera.FOV.BLUE_DOT);
-        fovComboBox.getSelectionModel().selectFirst();
+        fovComboBox.valueProperty()
+                .addListener((o, old, value) -> camera.setFov(value));
 
         videoModeComboBox.getItems().addAll(PS3Camera.VideoMode.class.getEnumConstants());
         videoModeComboBox.valueProperty()
@@ -155,7 +157,9 @@ public class SettingsWindowController {
 
     @FXML
     public void cancelOnAction() {
-        initialSettings.restoreCameraSettings(camera);
+        if (initialSettings != null) {
+            initialSettings.restoreCameraSettings(camera);
+        }
         stage.close();
     }
 
@@ -187,6 +191,7 @@ public class SettingsWindowController {
         boolean flipH;
         boolean flipV;
         PS3Camera.VideoMode videoMode;
+        PS3Camera.FOV fov;
 
         CameraSettings(final PS3Camera camera) {
             gain = camera.getGain();
@@ -203,6 +208,7 @@ public class SettingsWindowController {
             flipH = camera.getHorizontalFlip();
             flipV = camera.getVerticalFlip();
             videoMode = camera.getVideoMode();
+            fov = camera.getFov();
         }
 
         void restoreCameraSettings(final PS3Camera camera) {
@@ -220,6 +226,7 @@ public class SettingsWindowController {
             camera.setFlipH(flipH);
             camera.setFlipV(flipV);
             camera.setVideoMode(videoMode);
+            camera.setFov(fov);
         }
     }
 }

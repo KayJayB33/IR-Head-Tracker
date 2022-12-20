@@ -1,14 +1,7 @@
 package pl.edu.pk.mech.tracking;
 
 import org.opencv.calib3d.Calib3d;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfDouble;
-import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.MatOfPoint3f;
-import org.opencv.core.Point;
-import org.opencv.core.Point3;
-import org.opencv.core.Size;
+import org.opencv.core.*;
 import pl.edu.pk.mech.model.Model;
 
 import java.util.ArrayList;
@@ -22,8 +15,6 @@ import java.util.stream.Stream;
 import static org.opencv.imgproc.Imgproc.line;
 
 public class HeadPoseEstimator {
-
-    private static final float FOV = 56f;
     private static final MatOfPoint3f model = new MatOfPoint3f(Model.getInstance().getPoints());
     private static final MatOfPoint3f axis = new MatOfPoint3f(
             new Point3(0, 0, 0),
@@ -33,7 +24,7 @@ public class HeadPoseEstimator {
     private static final Mat[] lastSolution = new Mat[2];
     private static final Logger LOGGER = Logger.getLogger(HeadPoseEstimator.class.getName());
 
-    public static void estimate(final Mat src, final List<Point> points) {
+    public static void estimate(final Mat src, final List<Point> points, final int fov) {
         assert points.size() == 3;
 
         points.sort(Comparator.comparingDouble(p -> p.y));
@@ -48,7 +39,7 @@ public class HeadPoseEstimator {
                 points.stream(),
                 Stream.of(dummy2DPoint)).collect(Collectors.toList()));
 
-        float focalLength = (float) (src.cols() / 2. / Math.tan(FOV / 2.));
+        float focalLength = (float) (src.cols() / 2. / Math.tan(fov / 2.));
         final Mat camMat = getCameraMatrix(focalLength, new Size(src.cols() / 2., src.rows() / 2.));
         final MatOfDouble distCoeff = new MatOfDouble();
 

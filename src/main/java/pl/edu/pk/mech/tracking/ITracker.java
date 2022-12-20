@@ -16,7 +16,7 @@ public interface ITracker {
     OpenCVFrameConverter.ToOrgOpenCvCoreMat MAT_FRAME_CONVERTER
             = new OpenCVFrameConverter.ToOrgOpenCvCoreMat();
 
-    Frame track(Frame frame, float threshold, float minRadius, float maxRadius);
+    Frame track(Frame frame, float threshold, float minRadius, float maxRadius, int fov);
 
     int getDetectedAmount();
 

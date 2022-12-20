@@ -18,11 +18,18 @@ import java.util.logging.Logger;
 public class DemoTrackingThread extends TrackingThread {
 
     private static final Logger LOGGER = Logger.getLogger(DemoTrackingThread.class.getName());
+    private static final File DEMO_VIDEO = new File("./res/ExampleVideo.mp4");
+    private static final int FOV = 56;
     private final File videoFile;
 
     public DemoTrackingThread(final MainWindowController controller, final ITracker tracker, final File videoFile) {
         super(controller, tracker);
         this.videoFile = videoFile;
+    }
+
+    public DemoTrackingThread(final MainWindowController controller, final ITracker tracker) {
+        super(controller, tracker);
+        this.videoFile = DEMO_VIDEO;
     }
 
     @Override
@@ -64,7 +71,8 @@ public class DemoTrackingThread extends TrackingThread {
                                 imageFrame,
                                 (float) controller.getThresholdValue(),
                                 (float) controller.getMinRadiusValue(),
-                                (float) controller.getMaxRadiusValue());
+                                (float) controller.getMaxRadiusValue(),
+                                FOV);
 
                         final Image image = converter.convert(imageFrame);
                         final Image thresholdImage = converter.convert(binaryFrame);

@@ -1,11 +1,7 @@
 package pl.edu.pk.mech.tracking;
 
 import org.bytedeco.javacv.Frame;
-import org.opencv.core.KeyPoint;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfKeyPoint;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
+import org.opencv.core.*;
 import org.opencv.features2d.SimpleBlobDetector;
 import org.opencv.features2d.SimpleBlobDetector_Params;
 
@@ -17,13 +13,7 @@ import java.util.stream.Collectors;
 import static org.bytedeco.opencv.global.opencv_features2d.DRAW_RICH_KEYPOINTS;
 import static org.opencv.core.Core.bitwise_not;
 import static org.opencv.features2d.Features2d.drawKeypoints;
-import static org.opencv.imgproc.Imgproc.COLOR_BGR2GRAY;
-import static org.opencv.imgproc.Imgproc.COLOR_GRAY2BGR;
-import static org.opencv.imgproc.Imgproc.FONT_HERSHEY_SIMPLEX;
-import static org.opencv.imgproc.Imgproc.THRESH_BINARY;
-import static org.opencv.imgproc.Imgproc.cvtColor;
-import static org.opencv.imgproc.Imgproc.putText;
-import static org.opencv.imgproc.Imgproc.threshold;
+import static org.opencv.imgproc.Imgproc.*;
 
 public class BlobTracker implements ITracker {
 
@@ -41,7 +31,7 @@ public class BlobTracker implements ITracker {
     private List<KeyPoint> keypointsList;
 
     @Override
-    public Frame track(final Frame frame, final float threshold, final float minRadius, final float maxRadius) {
+    public Frame track(final Frame frame, final float threshold, final float minRadius, final float maxRadius, final int fov) {
         if (newParamsDetected(threshold, minRadius, maxRadius)) {
             detector = SimpleBlobDetector.create(params);
         }
@@ -70,7 +60,7 @@ public class BlobTracker implements ITracker {
                 .collect(Collectors.toList());
 
         if (keypointsList.size() == 3) {
-            HeadPoseEstimator.estimate(src, detectedPoints);
+            HeadPoseEstimator.estimate(src, detectedPoints, fov);
             // Sorting keypoints (assuming there are only 3)
             keypointsList.sort(Comparator.comparingDouble(kp -> kp.pt.y));
             keypointsList.subList(1, keypointsList.size()).sort(Comparator.comparingDouble(kp -> kp.pt.x));

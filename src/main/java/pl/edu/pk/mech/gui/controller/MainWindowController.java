@@ -14,7 +14,6 @@ import pl.edu.pk.mech.tracking.*;
 import pl.edu.pk.mech.util.PS3Camera;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -23,8 +22,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class MainWindowController implements Closeable {
-
-    private static final File VIDEO_FILE = new File("./res/ExampleVideo.mp4");
     private static final Logger LOGGER = Logger.getLogger(MainWindowController.class.getName());
     private final Map<String, ITracker> trackers = Map.of(
             ContourTracker.class.getSimpleName(),
@@ -162,7 +159,7 @@ public class MainWindowController implements Closeable {
                 .orElseThrow();
 
         if (selectedItem.equals(demoRadioMenuItem)) {
-            playThread = new DemoTrackingThread(this, trackers.get(trackerComboBox.getValue()), VIDEO_FILE);
+            playThread = new DemoTrackingThread(this, trackers.get(trackerComboBox.getValue()));
         } else {
             playThread = new CameraTrackingThread(this, trackers.get(trackerComboBox.getValue()), selectedItem.getText());
         }

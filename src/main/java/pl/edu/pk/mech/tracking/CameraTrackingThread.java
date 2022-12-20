@@ -27,8 +27,8 @@ public class CameraTrackingThread extends TrackingThread {
     public void run() {
         Platform.runLater(controller::updateInterface);
         try (final JavaFXFrameConverter converter = new JavaFXFrameConverter()) {
-            PS3Camera grabber = new PS3Camera(cameraName);
-            grabber.start();
+            PS3Camera camera = new PS3Camera(cameraName);
+            camera.start();
 
             LOGGER.info("Capturing started...");
             isPlaying = true;
@@ -36,7 +36,7 @@ public class CameraTrackingThread extends TrackingThread {
             final ExecutorService imageExecutor = Executors.newSingleThreadExecutor();
 
             while (isPlaying && !Thread.interrupted()) {
-                final Frame frame = grabber.grab();
+                final Frame frame = camera.grab();
                 if (frame == null) {
                     break;
                 }
@@ -47,7 +47,8 @@ public class CameraTrackingThread extends TrackingThread {
                             imageFrame,
                             (float) controller.getThresholdValue(),
                             (float) controller.getMinRadiusValue(),
-                            (float) controller.getMaxRadiusValue());
+                            (float) controller.getMaxRadiusValue(),
+                            camera.getFov().getValue());
 
                     final Image image = converter.convert(imageFrame);
                     final Image thresholdImage = converter.convert(binaryFrame);
@@ -64,7 +65,7 @@ public class CameraTrackingThread extends TrackingThread {
                 }
             }
 
-            grabber.stop();
+            camera.stop();
             // grabber.release() - not releasing USB device
 
             imageExecutor.shutdownNow();
