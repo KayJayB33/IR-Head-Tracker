@@ -12,6 +12,8 @@ build/
 .idea/git_toolbox_prj.xml
 .idea/misc.xml
 .idea/vcs.xml
+.idea/codeStyles/
+.idea/inspectionProfiles/
 *.iws
 *.iml
 *.ipr

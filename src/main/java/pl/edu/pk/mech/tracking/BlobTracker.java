@@ -41,7 +41,7 @@ public class BlobTracker implements ITracker {
 
         // Converting source image to grayscale
         final Mat gray = new Mat(src.rows(), src.cols(), src.type());
-        cvtColor(src, gray, COLOR_BGR2GRAY);
+        cvtColor(src, gray, COLOR_RGB2GRAY);
         bitwise_not(gray, gray);
 
         // Binary image for visualisation
@@ -82,7 +82,7 @@ public class BlobTracker implements ITracker {
 
         // Converting image to 3 channels for JavaFX
         bitwise_not(binary, binary);
-        cvtColor(binary, binary, COLOR_GRAY2BGR);
+        cvtColor(binary, binary, COLOR_GRAY2RGB);
         drawKeypoints(binary, keypoints, binary, RED_COLOR, DRAW_RICH_KEYPOINTS);
         return MAT_FRAME_CONVERTER.convert(binary);
     }

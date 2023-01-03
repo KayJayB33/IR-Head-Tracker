@@ -177,7 +177,7 @@ public class MainWindowController implements Closeable {
         trackerComboBox.setDisable(false);
     }
 
-    public void updateDetectedAmount(int amount) {
+    public void updateDetectedAmount(final int amount) {
         final String text = String.format("Detected objects: %d", amount);
 
         if (amount != 3) {

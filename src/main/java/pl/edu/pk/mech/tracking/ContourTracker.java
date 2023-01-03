@@ -26,14 +26,14 @@ public class ContourTracker implements ITracker {
 
         // Converting the source image to grayscale and thresholding
         final Mat gray = new Mat(src.rows(), src.cols(), src.type());
-        cvtColor(src, gray, COLOR_BGR2GRAY);
+        cvtColor(src, gray, COLOR_RGB2GRAY);
         final Mat binary = new Mat(src.rows(), src.cols(), src.type(), new Scalar(0));
         threshold(gray, binary, threshold, 255, THRESH_BINARY);
 
         // Finding Contours
         final List<MatOfPoint> contours = new ArrayList<>();
         final Mat hierarchy = new Mat();
-        findContours(binary, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
+        findContours(binary, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
 
         // Filtering contours
         contours.removeIf(contour -> {
@@ -70,7 +70,7 @@ public class ContourTracker implements ITracker {
         }
 
         // Converting image to 3 channels for JavaFX
-        cvtColor(binary, binary, COLOR_GRAY2BGR);
+        cvtColor(binary, binary, COLOR_GRAY2RGB);
         drawContours(binary, contours, -1, RED_COLOR, 2);
         return MAT_FRAME_CONVERTER.convert(binary);
     }

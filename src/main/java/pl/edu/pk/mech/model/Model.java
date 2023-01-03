@@ -9,19 +9,30 @@ import java.util.stream.Collectors;
 public class Model {
 
     private static volatile Model model;
-    private double halfWidth = 80.;
-    private double depth = 165.;
-    private final Point3 leftPoint = new Point3(depth, -halfWidth, 0.); // #2
-    private final Point3 rightPoint = new Point3(depth, halfWidth, 0.); // #3
-    private double height = 145.;
-    private final Point3 topPoint = new Point3(0., 0., height); // #1
-    private final Point3 dummyPoint = new Point3(getDummyPointCoords(topPoint, leftPoint, rightPoint)); // #4
-    private final List<Point3> pointsList = List.of(topPoint, leftPoint, rightPoint, dummyPoint);
+    private final Point3 topPoint;
+    private final Point3 leftPoint;
+    private final Point3 rightPoint;
+    private final Point3 dummyPoint;
+    private final List<Point3> pointsList;
+    private double halfWidth;
+    private double depth;
+    private double height;
 
     private Model() {
         if (model != null) {
             throw new RuntimeException("Not allowed. Please use getInstance() method");
         }
+
+        halfWidth = 80.;
+        depth = 165.;
+        height = 145.;
+
+        topPoint = new Point3(0., 0., height); // #1
+        leftPoint = new Point3(depth, -halfWidth, 0.); // #2
+        rightPoint = new Point3(depth, halfWidth, 0.); // #3
+        dummyPoint = new Point3(getDummyPointCoords(topPoint, leftPoint, rightPoint)); // #4
+
+        pointsList = List.of(topPoint, leftPoint, rightPoint, dummyPoint);
     }
 
     public static Model getInstance() {
