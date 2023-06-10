@@ -2,6 +2,7 @@ package pl.edu.pk.mech.tracking;
 
 import org.opencv.core.*;
 import pl.edu.pk.mech.model.Model;
+import pl.edu.pk.mech.udp.UDPServer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -81,6 +82,12 @@ public class HeadPoseEstimator {
             lastSolution[0] = rotations.get(index);
             lastSolution[1] = translations.get(index);
         }
+
+        UDPServer.sendVector(
+                (float)lastSolution[1].get(2, 0)[0],
+                (float)lastSolution[1].get(1, 0)[0],
+                (float)lastSolution[1].get(0, 0)[0]
+        );
 
         // Projecting axis to image for line drawing
         final MatOfPoint2f projectedAxis = new MatOfPoint2f();
